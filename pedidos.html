@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comanda Touch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header-section">
+    <button class="back-button" onclick="window.history.back()">Volver</button>
+  </div>
+
+  <div class="main-content">
+    <h2>Mesa <span id="mesaNum"></span> | Garzón: <span id="garzonNom"></span> | Personas: <span id="personasNum"></span></h2>
+
+    <h3>👨‍🍳 Familias</h3>
+    <div class="familias panel-grid" id="familias"></div>
+
+    <h3>📦 Subfamilias</h3>
+    <div class="subfamilias panel-grid" id="subfamilias"></div>
+
+    <h3>🍽️ Productos</h3>
+    <div class="productos panel-grid" id="productos"></div>
+    <button id="verMasBtn" class="btn-blue hidden">Ver más productos</button>
+
+    <table class="comanda-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody id="comandaBody"></tbody>
+    </table>
+
+    <div class="action-buttons">
+      <button class="btn-green" onclick="exportarCSV()">Enviar Mesa</button>
+      <button class="btn-blue" onclick="descargarProductos()">Actualizar Productos</button>
+    </div>
+
+    <div id="logEnvio"></div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const mesa = urlParams.get('mesa') || '';
+    const garzon = urlParams.get('garzon') || '';
+    const personas = urlParams.get('personas') || '';
+    const horaApertura = urlParams.get('horaApertura') || '';
+
+    document.getElementById("mesaNum").innerText = mesa;
+    document.getElementById("garzonNom").innerText = garzon;
+    document.getElementById("personasNum").innerText = personas;
+
+    let productos = [];
+    let currentSessionProducts = [];
+    let existingProductsFromBackend = [];
+
+    let currentFamily = '';
+    let currentSubfamily = '';
+    let productsShownCount = 0;
+    let filteredProducts = [];
+
+    async function cargarProductos() {
+      const cachedData = localStorage.getItem('cachedProductsData');
+      if (cachedData) {
+        const { products: cachedProducts, lastModified: cachedLastModified } = JSON.parse(cachedData);
+        if (cachedProducts && cachedProducts.length > 0) {
+          productos = cachedProducts;
+          mostrarFamilias();
+          console.log('Productos cargados desde caché.');
+        }
+      }
+
+      try {
+        const response = await fetch(`${BACKEND_BASE_URL}/productos`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error al cargar productos del servidor');
+        }
+        const { products: latestProducts, lastModified: latestModifiedTime } = await response.json();
+
+        if (!cachedData || latestModifiedTime > JSON.parse(cachedData).lastModified) {
+          console.log('Base de productos actualizada, actualizando caché.');
+          productos = latestProducts;
+          localStorage.setItem('cachedProductsData', JSON.stringify({ products: latestProducts, lastModified: latestModifiedTime }));
+          mostrarFamilias();
+        } else {
+          console.log('Base de productos no ha cambiado, usando caché existente.');
+        }
+        cargarComandaExistente();
+      } catch (err) {
+        console.error('Fallo al cargar la base de productos desde el backend:', err.message);
+        if (!cachedData) {
+          alert('No se pudo cargar la base de productos: ' + err.message + '. Intente actualizar o contacte a soporte.');
+        }
+      }
+    }
+
+    async function descargarProductos() {
+      let logDiv = document.getElementById('logEnvio');
+      if (!logDiv) {
+        logDiv = document.createElement('div');
+        logDiv.id = 'logEnvio';
+        logDiv.style = 'margin-top:8px;font-size:0.95em;color:#888;';
+        document.querySelector('button[onclick="exportarCSV()"]')
+          .insertAdjacentElement('afterend', logDiv);
+      }
+      logDiv.textContent = 'Descargando productos... por favor espere.';
+
+      try {
+        const response = await fetch(`${BACKEND_BASE_URL}/descargar-productos`, { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Error desconocido al descargar productos');
+        }
+        logDiv.textContent = data.message;
+        await cargarProductos();
+        setTimeout(() => logDiv.textContent = '', 3000);
+      } catch (err) {
+        logDiv.textContent = 'Error al descargar productos: ' + err.message;
+        console.error('Error en descargarProductos:', err);
+      }
+    }
+
+    cargarProductos();
+
+    function cargarComandaExistente() {
+      if (!mesa) return;
+      fetch(`${BACKEND_BASE_URL}/mesas/${mesa}`)
+        .then(res => {
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('Error al cargar mesa existente');
+          return res.json();
+        })
+        .then(data => {
+          if (data && data.productos) {
+            existingProductsFromBackend = data.productos;
+            existingProductsFromBackend.forEach(item => item.cantidad = parseInt(item.cantidad, 10));
+          }
+        })
+        .catch(err => {
+          console.error('Error al cargar la comanda existente:', err);
+        });
+    }
+
+    function mostrarFamilias() {
+      const cont = document.getElementById("familias");
+      const subfamiliasCont = document.getElementById("subfamilias");
+      const productosCont = document.getElementById("productos");
+      const verMasBtn = document.getElementById("verMasBtn");
+
+      cont.innerHTML = "";
+      subfamiliasCont.innerHTML = "";
+      productosCont.innerHTML = "";
+      verMasBtn.classList.add('hidden');
+
+      const familias = [...new Set(productos.map(p => p.familia))];
+      familias.forEach(fam => {
+        const btn = document.createElement("button");
+        const spanText = document.createElement("span");
+        spanText.className = "button-text";
+        spanText.innerText = fam;
+        btn.appendChild(spanText);
+        btn.onclick = () => mostrarSubfamilias(fam);
+        cont.appendChild(btn);
+      });
+    }
+
+    function mostrarSubfamilias(familiaSeleccionada) {
+      const subfamiliasCont = document.getElementById("subfamilias");
+      const productosCont = document.getElementById("productos");
+      const verMasBtn = document.getElementById("verMasBtn");
+
+      subfamiliasCont.innerHTML = "";
+      productosCont.innerHTML = "";
+      verMasBtn.classList.add('hidden');
+
+      currentFamily = familiaSeleccionada;
+      currentSubfamily = '';
+      productsShownCount = 0;
+
+      const subfamilias = [...new Set(productos
+        .filter(p => p.familia === familiaSeleccionada)
+        .map(p => p.subfamilia)
+        .filter(sub => sub)
+      )];
+
+      subfamilias.sort().forEach(sub => {
+        const btn = document.createElement("button");
+        const spanText = document.createElement("span");
+        spanText.className = "button-text";
+        spanText.innerText = sub;
+        btn.appendChild(spanText);
+        btn.onclick = () => mostrarProductosPorSubfamilia(familiaSeleccionada, sub);
+        subfamiliasCont.appendChild(btn);
+      });
+
+      if (subfamilias.length === 0) {
+        mostrarProductosPorSubfamilia(familiaSeleccionada, null);
+      }
+    }
+
+    function mostrarProductosPorSubfamilia(familia, subfamilia, reiniciar = true) {
+      const cont = document.getElementById("productos");
+      const verMasBtn = document.getElementById("verMasBtn");
+
+      if (reiniciar) {
+        cont.innerHTML = "";
+        productsShownCount = 0;
+        currentSubfamily = subfamilia;
+        filteredProducts = productos.filter(p => p.familia === familia && (subfamilia === null || p.subfamilia === subfamilia));
+      }
+
+      const productsToShow = filteredProducts.slice(productsShownCount, productsShownCount + 8);
+
+      productsToShow.forEach(p => {
+        const productCard = document.createElement("div");
+        productCard.className = "product-card";
+        productCard.innerHTML = `
+          <div class="product-name">${p.nombre}</div>
+          <div class="product-price">$${p.precio}</div>
+          <button class="add-product-btn" data-codigo="${p.codigo}" data-nombre="${p.nombre}" data-precio="${p.precio}">Agregar</button>
+        `;
+        productCard.querySelector('.add-product-btn').onclick = () => agregarProducto(p);
+        cont.appendChild(productCard);
+      });
+
+      productsShownCount += productsToShow.length;
+
+      if (productsShownCount < filteredProducts.length) {
+        verMasBtn.classList.remove('hidden');
+        verMasBtn.onclick = () => mostrarProductosPorSubfamilia(currentFamily, currentSubfamily, false);
+      } else {
+        verMasBtn.classList.add('hidden');
+      }
+    }
+
+    function agregarProducto(prod) {
+      const existente = currentSessionProducts.find(p => p.codigo === prod.codigo);
+      if (existente) {
+        existente.cantidad += 1;
+      } else {
+        currentSessionProducts.push({ ...prod, cantidad: 1 });
+      }
+      renderComanda();
+      saveOrderCache();
+    }
+
+    function eliminarProducto(index) {
+      currentSessionProducts.splice(index, 1);
+      renderComanda();
+      saveOrderCache();
+    }
+
+    function renderComanda() {
+      const tbody = document.getElementById("comandaBody");
+      tbody.innerHTML = "";
+      currentSessionProducts.forEach((item, i) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.codigo}</td>
+          <td>${item.nombre}</td>
+          <td>${item.precio}</td>
+          <td>${item.cantidad}</td>
+          <td><button onclick="eliminarProducto(${i})">X</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function exportarCSV() {
+      if (!mesa) {
+        alert("Debe ingresar mesa.");
+        return;
+      }
+
+      let logDiv = document.getElementById('logEnvio');
+      if (!logDiv) {
+        logDiv = document.createElement('div');
+        logDiv.id = 'logEnvio';
+        logDiv.style = 'margin-top:8px;font-size:0.95em;color:#888;';
+        document.querySelector('button[onclick="exportarCSV()"]')
+          .insertAdjacentElement('afterend', logDiv);
+      }
+      logDiv.textContent = 'Enviando comanda...';
+
+      const mesaObj = {
+        mesa,
+        garzon,
+        personas,
+        productos: currentSessionProducts,
+        hora: new Date().toLocaleTimeString()
+      };
+
+      try {
+        // Paso 1: Guardar la mesa en el JSON (acumular productos)
+        const responseJson = await fetch(`${BACKEND_BASE_URL}/mesas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(mesaObj)
+        });
+
+        if (!responseJson.ok) {
+          const errorData = await responseJson.json();
+          throw new Error(errorData.error || 'Error desconocido al guardar la mesa en el backend');
+        }
+
+        let txtMessage = 'Mesa guardada correctamente.';
+
+        // Paso 2: Enviar los productos de la sesión actual al archivo TXT si hay nuevos productos
+        if (currentSessionProducts.length > 0) {
+          const responseTxt = await fetch(`${BACKEND_BASE_URL}/enviar-comanda-productos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mesa,
+              garzon,
+              productos: currentSessionProducts
+            })
+          });
+
+          if (!responseTxt.ok) {
+            const errorData = await responseTxt.json();
+            throw new Error(errorData.error || 'Error desconocido al enviar la comanda TXT');
+          }
+          txtMessage += ' Comanda TXT enviada.';
+        } else {
+            txtMessage += ' No hay productos nuevos para enviar en comanda TXT.';
+        }
+
+        logDiv.textContent = txtMessage;
+        currentSessionProducts = [];
+        renderComanda();
+        clearOrderCache();
+
+        setTimeout(() => {
+          logDiv.textContent = '';
+          location.href = "inicio.html";
+        }, 1000);
+
+      } catch (err) {
+        logDiv.textContent = 'Error en el envío de comanda: ' + err.message;
+        console.error('Error en exportarCSV:', err);
+      }
+    }
+
+    function saveOrderCache() {
+      if (mesa) {
+        localStorage.setItem(`pedido-mesa-${mesa}`, JSON.stringify(currentSessionProducts));
+        console.log(`Pedido para mesa ${mesa} guardado en caché.`);
+      }
+    }
+
+    function clearOrderCache() {
+      if (mesa) {
+        localStorage.removeItem(`pedido-mesa-${mesa}`);
+        console.log(`Caché para mesa ${mesa} eliminada.`);
+      }
+    }
+
+    function loadOrderCache() {
+      if (mesa) {
+        const cachedOrder = localStorage.getItem(`pedido-mesa-${mesa}`);
+        if (cachedOrder) {
+          try {
+            currentSessionProducts = JSON.parse(cachedOrder);
+            renderComanda();
+            console.log(`Pedido para mesa ${mesa} restaurado desde caché.`);
+          } catch (e) {
+            console.error("Error al parsear caché de pedido:", e);
+            clearOrderCache();
+          }
+        }
+      }
+    }
+
+    loadOrderCache();
+  </script>
+</body>
+</html>

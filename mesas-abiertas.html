@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mesas del Restaurante</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header-section">
+    <button class="back-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+    <div class="logo-header">
+      <div class="logo-text">FASTER CONSULTORES</div>
+    </div>
+  </div>
+
+  <h1>🍽️ Mesas del Restaurante</h1>
+  <div id="table-overview"></div>
+  <div id="table-detail"></div>
+  <script>
+    let tables = [];
+    const overviewDiv = document.getElementById('table-overview');
+    const detailDiv = document.getElementById('table-detail');
+
+    function fetchMesasAbiertas() {
+      fetch(`${BACKEND_BASE_URL}/mesas`)
+        .then(res => res.json())
+        .then(data => {
+          tables = Object.values(data);
+          renderOverview();
+        })
+        .catch(() => {
+          overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto;">No se pudo conectar al servidor.</div>';
+        });
+    }
+
+    function renderOverview() {
+      detailDiv.style.display = 'none';
+      overviewDiv.style.display = 'grid';
+      overviewDiv.innerHTML = '';
+      if (tables.length === 0) {
+        overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto;">No hay mesas abiertas actualmente.</div>';
+        return;
+      }
+      tables.forEach(table => {
+        const card = document.createElement('div');
+        card.className = 'table-card';
+        card.setAttribute('data-status', 'open');
+        card.onclick = () => showDetail(table.mesa);
+        card.innerHTML = `
+          <div class="table-id">Mesa ${table.mesa}</div>
+          <div class="table-status">Abierta</div>
+          <div class="table-occupancy">${table.personas} ${parseInt(table.personas) === 1 ? 'persona' : 'personas'}</div>
+          <div class="table-waiter">Garzón: ${table.garzon}</div>
+          <div class="table-time">Hora: ${table.hora || ''}</div>
+        `;
+        overviewDiv.appendChild(card);
+      });
+    }
+
+    function showDetail(mesaId) {
+      const table = tables.find(t => t.mesa == mesaId);
+      if (!table) return;
+      overviewDiv.style.display = 'none';
+      detailDiv.style.display = 'block';
+      // Calcular total
+      const total = (table.productos || []).reduce((sum, item) => sum + (parseFloat(item.precio) * (item.cantidad || 1)), 0);
+      // Estado de cuenta emitida
+      const cuentaEmitida = table.cuenta_emitida;
+      detailDiv.innerHTML = `
+        <h2>Mesa ${table.mesa} - <span id="estadoMesa">${cuentaEmitida ? 'Cuenta solicitada' : 'Abierta'}</span></h2>
+        <div><span class="detail-label">Garzón:</span> <span class="detail-value">${table.garzon}</span></div>
+        <div><span class="detail-label">Ocupantes:</span> <span class="detail-value">${table.personas}</span></div>
+        <div><span class="detail-label">Hora de apertura:</span> <span class="detail-value">${table.hora || ''}</span></div>
+        <div style="margin: 16px 0 8px 0;"><span class="detail-label">Consumo:</span></div>
+        ${table.productos && table.productos.length > 0 ? `
+        <table class="order-items-table">
+          <thead>
+            <tr><th>Código</th><th>Producto</th><th>Precio</th><th>Cantidad</th></tr>
+          </thead>
+          <tbody>
+            ${table.productos.map(item => `
+              <tr>
+                <td>${item.codigo}</td>
+                <td>${item.nombre}</td>
+                <td>$${item.precio}</td>
+                <td>${item.cantidad}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ` : '<div style="color:#888;">Sin productos en la comanda.</div>'}
+        <div style="margin-top:10px;"><span class="detail-label">Total:</span> <span class="detail-value" id="totalMesa">$${total}</span></div>
+        <div class="nav-btns">
+          <button onclick="window.fetchMesasAbiertas()">Volver</button>
+          <button onclick="window.goHome()">Inicio</button>
+          <button id="emitirCuentaBtn" style="background:#F44336;" ${cuentaEmitida ? 'disabled' : ''}>EMITE CUENTA</button>
+          <button id="cerrarMesaBtn" style="background:#607D8B;">Cerrar Mesa</button>
+        </div>
+        <div id="msgCuenta" style="margin-top:10px;color:#4CAF50;"></div>
+      `;
+      // Cambiar color de estado si cuenta emitida
+      if (cuentaEmitida) {
+        document.getElementById('estadoMesa').style.color = '#F44336';
+      }
+      // Lógica del botón EMITE CUENTA
+      const btnEmitir = document.getElementById('emitirCuentaBtn');
+      if (btnEmitir && !cuentaEmitida) {
+        btnEmitir.onclick = function() {
+          btnEmitir.disabled = true;
+          btnEmitir.textContent = 'Enviando...';
+          fetch(`${BACKEND_BASE_URL}/emitir-cuenta`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mesa: table.mesa, garzon: table.garzon, total })
+          })
+          .then(res => res.json())
+          .then(resp => {
+            document.getElementById('msgCuenta').textContent = resp.ok ? 'Cuenta emitida y enviada correctamente.' : 'Error al emitir cuenta.';
+            document.getElementById('estadoMesa').textContent = 'Cuenta solicitada';
+            document.getElementById('estadoMesa').style.color = '#F44336';
+            btnEmitir.textContent = 'Cuenta Emitida';
+            btnEmitir.disabled = true;
+            // No eliminamos la mesa aquí, solo marcamos cuenta emitida
+          })
+          .catch(() => {
+            document.getElementById('msgCuenta').textContent = 'Error al emitir cuenta.';
+            btnEmitir.textContent = 'EMITE CUENTA';
+            btnEmitir.disabled = false;
+          });
+        };
+      }
+      // Lógica del botón Cerrar Mesa
+      const btnCerrar = document.getElementById('cerrarMesaBtn');
+      if (btnCerrar) {
+        btnCerrar.onclick = function() {
+          if (confirm(`¿Estás seguro de cerrar la Mesa ${table.mesa}? Esta acción la eliminará del sistema.`)) {
+            fetch(`${BACKEND_BASE_URL}/mesas/${table.mesa}`, {
+              method: 'DELETE'
+            })
+            .then(res => {
+              if (!res.ok) {
+                return res.json().then(errorData => {
+                  throw new Error(errorData.error || 'Error desconocido al cerrar la mesa');
+                });
+              }
+              alert(`Mesa ${table.mesa} cerrada y eliminada correctamente.`);
+              fetchMesasAbiertas(); // Vuelve a cargar las mesas para reflejar el cambio
+            })
+            .catch(err => {
+              alert('No se pudo cerrar la mesa: ' + err.message);
+              console.error('Error al cerrar la mesa:', err);
+            });
+          }
+        };
+      }
+    }
+
+    window.fetchMesasAbiertas = fetchMesasAbiertas;
+    window.showDetail = showDetail;
+    window.goHome = function() {
+      window.location.href = 'inicio.html';
+    };
+
+    fetchMesasAbiertas();
+  </script>
+</body>
+</html>

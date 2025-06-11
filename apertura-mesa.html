@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Apertura de Mesa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script> <!-- Importar el archivo de configuración primero -->
+  <style>
+    body {
+      background-color: var(--light-gray);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .header-section {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h2{
+      text-align: center;
+    }
+
+    .back-button {
+      background-color: var(--light-blue);
+      color: var(--white);
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .back-button:hover {
+      background-color: #1976D2;
+    }
+
+    .logo-header {
+      text-align: center;
+      flex-grow: 1; /* Permite que el logo ocupe el espacio central */
+    }
+
+    .logo-header img {
+      max-width: 150px;
+      height: auto;
+    }
+
+    .logo-header .logo-text {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: var(--primary-blue);
+      margin-top: 5px;
+    }
+
+    .logo-header .tagline {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .form-group {
+      background-color: var(--white);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      margin-top: 20px; /* Espacio para el header */
+    }
+
+    input {
+      font-size: 2em;
+      padding: 12px 15px;
+      width: calc(100% - 30px); /* Ajusta el padding */
+      margin-bottom: 25px;
+      text-align: center;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      outline: none;
+      color: var(--primary-blue);
+    }
+
+    input:focus {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+    }
+
+    .teclado {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); /* Columnas de igual ancho */
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .teclado button {
+      font-size: 2em;
+      padding: 25px 0;
+      background-color: var(--dark-gray);
+      color: var(--primary-blue);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .teclado button:hover {
+      background-color: var(--medium-gray);
+    }
+
+    .botones-control {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+      gap: 10px;
+    }
+
+    .botones-control button {
+      flex-grow: 1;
+      padding: 15px;
+      font-size: 1.1em;
+    }
+
+    .botones-control .red-button {
+      background-color: #f44336; /* Rojo para Borrar */
+    }
+
+    .botones-control .gray-button {
+      background-color: gray; /* Gris para Volver */
+    }
+
+    .botones-control .green-button {
+      background-color: #4CAF50; /* Verde para Siguiente */
+    }
+
+    .mensaje {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    /* Media Queries para Responsividad */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      .form-group {
+        padding: 25px;
+      }
+      input {
+        font-size: 1.8em;
+        padding: 10px 12px;
+      }
+      .teclado button {
+        font-size: 1.8em;
+        padding: 20px 0;
+      }
+      .botones-control button {
+        font-size: 1em;
+        padding: 12px;
+      }
+      .logo-header img {
+        max-width: 120px;
+      }
+      .logo-header .logo-text {
+        font-size: 1em;
+      }
+      .logo-header .tagline {
+        font-size: 0.8em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .form-group {
+        padding: 20px;
+      }
+      input {
+        font-size: 1.5em;
+        padding: 8px 10px;
+      }
+      .teclado button {
+        font-size: 1.5em;
+        padding: 15px 0;
+      }
+      .botones-control button {
+        font-size: 0.9em;
+        padding: 10px;
+      }
+      .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .back-button {
+        margin-bottom: 15px;
+        width: 100%;
+      }
+      .logo-header {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header-section">
+    <button class="back-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+    <div class="logo-header">
+      <div class="logo-text">FASTER CONSULTORES</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="form-group">
+      <h2 id="etapaLabel">Ingrese código del garzón</h2>
+      <input type="text" id="inputCampo" readonly>
+      <div id="mensaje" class="mensaje hidden"></div>
+
+      <div class="teclado" id="teclado"></div>
+
+      <div class="botones-control">
+        <button class="red-button" onclick="borrar()">Borrar</button>
+        <button class="gray-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+        <button class="green-button" onclick="siguienteEtapa()">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let etapa = 0;
+    const datos = { codigo: "", mesa: "", personas: "" };
+    const input = document.getElementById("inputCampo");
+    const label = document.getElementById("etapaLabel");
+    const mensajeDiv = document.getElementById("mensaje");
+
+    const etapasTexto = [
+      "Ingrese código del garzón",
+      "Ingrese número de mesa",
+      "Ingrese cantidad de personas"
+    ];
+
+    const campos = ["codigo", "mesa", "personas"];
+
+    function actualizarVista() {
+      label.innerText = etapasTexto[etapa];
+      input.value = datos[campos[etapa]];
+      mensajeDiv.classList.add('hidden'); // Ocultar mensajes al cambiar de etapa
+    }
+
+    async function siguienteEtapa() {
+      const valor = input.value.trim();
+      if (!valor) {
+        mostrarMensaje("Debe ingresar un valor.", "error");
+        return;
+      }
+      datos[campos[etapa]] = valor;
+
+      if (etapa === 0) { // Ingreso de código de garzón
+        localStorage.setItem('garzon', datos.codigo); // Guardar garzón
+        etapa++;
+        actualizarVista();
+      } else if (etapa === 1) { // Ingreso de número de mesa
+        const mesaId = datos.mesa;
+        const garzonId = datos.codigo;
+
+        try {
+          const checkResponse = await fetch(`${BACKEND_BASE_URL}/mesas/${mesaId}`);
+          if (checkResponse.ok) {
+            const existingMesa = await checkResponse.json();
+            if (existingMesa.garzon !== garzonId) {
+              mostrarMensaje(`Mesa ${mesaId} ya está siendo atendida por ${existingMesa.garzon}.`, "error");
+              return;
+            } else {
+              // Mismo garzón reabriendo la mesa, no pedir personas, ir directo a pedidos
+              window.location.href = `pedidos.html?mesa=${mesaId}&garzon=${garzonId}&personas=${existingMesa.personas || 1}`;
+              return;
+            }
+          } else if (checkResponse.status === 404) {
+            // Mesa no existe (es nueva), avanzar a la etapa de pedir cantidad de personas
+            etapa++;
+            actualizarVista();
+          } else {
+            const errorData = await checkResponse.json();
+            throw new Error(errorData.error || 'Error desconocido al verificar mesa existente.');
+          }
+        } catch (error) {
+          console.error('Error al verificar mesa:', error);
+          mostrarMensaje('No se pudo conectar al servidor para verificar la mesa existente.');
+        }
+
+      } else if (etapa === 2) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const horaApertura = `${hours}:${minutes}`;
+
+        // Llamar al nuevo endpoint para iniciar el archivo TXT de la comanda
+        fetch(`${BACKEND_BASE_URL}/iniciar-comanda-txt`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mesa: datos.mesa,
+            garzon: datos.codigo,
+            personas: datos.personas,
+            horaApertura: horaApertura // Enviar la hora de apertura al backend
+          })
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(errorData => {
+              throw new Error(errorData.error || 'Error al iniciar comanda TXT');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data.message);
+          // Redirigir solo si la creación del TXT fue exitosa
+          window.location.href = `pedidos.html?mesa=${datos.mesa}&garzon=${datos.codigo}&personas=${datos.personas}&horaApertura=${horaApertura}`;
+        })
+        .catch(error => {
+          mostrarMensaje(`Error: ${error.message}`, 'error');
+          console.error('Error al iniciar comanda TXT:', error);
+        });
+        return;
+      }
+    }
+
+    function borrar() {
+      input.value = "";
+      mensajeDiv.classList.add('hidden'); // Ocultar mensaje al borrar
+    }
+
+    function mostrarMensaje(msg, type) {
+      mensajeDiv.textContent = msg;
+      mensajeDiv.className = `mensaje ${type}`;
+      mensajeDiv.classList.remove('hidden');
+    }
+    function agregarTeclado() {
+      const cont = document.getElementById("teclado");
+      const teclas = ['1','2','3','4','5','6','7','8','9','0','←','C'];
+      teclas.forEach(tecla => {
+        const btn = document.createElement("button");
+        btn.textContent = tecla;
+        btn.onclick = () => {
+          if (tecla === '←') {
+            input.value = input.value.slice(0, -1);
+          } else if (tecla === 'C') {
+            input.value = '';
+          } else {
+            input.value += tecla;
+          }
+        };
+        cont.appendChild(btn);
+      });
+    }
+
+    // Cargar garzón guardado al inicio
+    // const garzonGuardado = localStorage.getItem('garzon');
+    // if (garzonGuardado) {
+    //   datos.codigo = garzonGuardado;
+    //   input.value = garzonGuardado;
+    //   etapa = 1; // Si hay garzón, saltar a pedir mesa
+    //   actualizarVista();
+    // } else {
+    //   actualizarVista();
+    // }
+
+    actualizarVista(); // Iniciar siempre pidiendo el garzón
+    agregarTeclado();
+  </script>
+</body>
+</html>

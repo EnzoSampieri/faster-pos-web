@@ -1,0 +1,1 @@
+const BACKEND_BASE_URL = 'http://192.168.100.82:3000'; 

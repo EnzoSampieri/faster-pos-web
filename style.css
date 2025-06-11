@@ -1,0 +1,544 @@
+:root {
+  --primary-blue: #1A237E; /* Un azul oscuro para la marca */
+  --light-blue: #2196F3;  /* Un celeste vibrante */
+  --white: #FFFFFF;
+  --light-gray: #f9f9f9;
+  --medium-gray: #ddd;
+  --dark-gray: #eee;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente moderna y legible */
+  padding: 20px;
+  background-color: var(--light-gray);
+  margin: 0;
+  color: #333;
+  line-height: 1.6;
+  text-align: center; /* Alineación central para todo el body */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2, h3 {
+  color: var(--primary-blue);
+  margin-bottom: 15px;
+}
+
+/* Header Section common for many pages */
+.header-section {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.back-button {
+  background-color: var(--light-blue);
+  color: var(--white);
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.back-button:hover {
+  background-color: #1976D2;
+}
+
+.logo-header {
+  text-align: center;
+  flex-grow: 1; /* Permite que el logo ocupe el espacio central */
+}
+
+.logo-header img {
+  max-width: 150px;
+  height: auto;
+}
+
+.logo-header .logo-text {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--primary-blue);
+  margin-top: 5px;
+}
+
+.logo-header .tagline {
+  font-size: 0.9em;
+  color: #555;
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 2.2em;
+  color: var(--primary-blue);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Estilos para botones */
+button {
+  padding: 15px 25px;
+  font-size: 1.1em;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: var(--light-blue);
+  color: var(--white);
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+button:hover {
+  background-color: #1976D2; /* Un tono más oscuro de celeste */
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Estilos para el logo */
+.logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.main-content {
+  max-width: 1200px; /* Ancho máximo para el contenido principal */
+  margin: 0 auto; /* Centrar el contenido */
+  padding: 0 20px; /* Padding horizontal para evitar que el contenido toque los bordes */
+  width: 100%; /* Asegura que ocupe todo el ancho disponible hasta el max-width */
+  box-sizing: border-box; /* Incluye padding en el width */
+}
+
+.logo img {
+  max-width: 250px; /* Tamaño máximo para el logo */
+  height: auto;
+}
+
+.logo-text {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: var(--primary-blue);
+  margin-top: 10px;
+}
+
+.tagline {
+  font-size: 1.1em;
+  color: #555;
+}
+
+/* Estilos generales para paneles (familias, productos) */
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Aumentar minmax por defecto */
+  gap: 15px;
+  margin-bottom: 20px;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Estilos específicos para los botones dentro de Familias y Subfamilias */
+.familias.panel-grid button,
+.subfamilias.panel-grid button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 48px; /* Mínimo de 48px de ancho táctil */
+  min-height: 48px; /* Mínimo de 48px de alto táctil */
+  height: 48px; /* Altura fija para uniformidad y tamaño táctil */
+  padding: 5px; /* Padding reducido para maximizar espacio de texto */
+  font-size: 0.8em; /* Fuente para mejor legibilidad */
+  box-sizing: border-box;
+}
+
+.familias.panel-grid button .button-text,
+.subfamilias.panel-grid button .button-text {
+  display: block;
+  width: 100%;
+  min-width: 0; /* Permitir que el texto se encoja */
+  flex-shrink: 1;
+  flex-grow: 0; /* Asegurar que el texto no intente crecer */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: 1.2; /* Ajustar line-height para legibilidad */
+}
+
+/* Estilos para las tarjetas de producto (Product Cards) */
+.product-card {
+  background-color: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box; /* Incluye padding y border en el width */
+  transition: transform 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.product-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--primary-blue);
+  margin-bottom: 8px;
+  flex-grow: 1; /* Permite que el nombre ocupe el espacio */
+}
+
+.product-price {
+  font-size: 1em;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.add-product-btn {
+  padding: 10px 15px;
+  font-size: 0.9em;
+  background-color: #4CAF50;
+  color: var(--white);
+  border-radius: 6px;
+  box-shadow: none;
+  min-width: 48px; /* Mínimo de 48px de ancho táctil */
+  min-height: 48px; /* Mínimo de 48px de alto táctil */
+  height: 48px; /* Altura fija para uniformidad y tamaño táctil */
+}
+
+.add-product-btn:hover {
+  background-color: #388E3C;
+  transform: translateY(-1px);
+}
+
+.add-product-btn:active {
+  transform: translateY(0);
+}
+
+/* Ajustes para el panel de productos para la cuadrícula */
+.productos.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 columnas para pantallas grandes */
+  gap: 15px;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+/* Estilos para el overview de mesas */
+#table-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Más pequeñas */
+  gap: 15px; /* Espacio más compacto */
+  margin: 0 auto 30px auto;
+  max-width: 1200px;
+  width: 100%;
+  justify-content: center;
+}
+
+.table-card {
+  background: var(--white);
+  border-radius: 10px; /* Bordes más redondeados */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra más suave */
+  padding: 15px; /* Reducir padding */
+  min-height: 100px; /* Reducir altura mínima */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  border: 3px solid transparent;
+}
+
+.table-card[data-status="open"] { border-color: #4CAF50; }
+.table-card[data-status="occupied"] { border-color: var(--light-blue); }
+.table-card[data-status="available"] { border-color: var(--medium-gray); }
+.table-card[data-status="cleaning"] { border-color: #FF9800; }
+
+.table-card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-3px) scale(1.02); /* Efecto hover más sutil */
+}
+
+.table-id {
+  font-size: 1.4em; /* Reducir tamaño de fuente */
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--primary-blue);
+}
+
+.table-status {
+  font-size: 0.9em; /* Reducir tamaño de fuente */
+  margin-bottom: 4px;
+  text-transform: capitalize;
+  color: #555;
+}
+
+.table-occupancy,
+.table-waiter,
+.table-time {
+  font-size: 0.8em; /* Reducir tamaño de fuente */
+  color: #777;
+  margin-bottom: 3px;
+}
+
+/* Detail view */
+#table-detail {
+  display: none;
+  max-width: 700px;
+  margin: 40px auto;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 32px;
+  text-align: left;
+  position: relative;
+}
+#table-detail h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+  color: var(--primary-blue);
+}
+.order-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.order-items-table th, .order-items-table td {
+  border: 1px solid var(--medium-gray);
+  padding: 10px 12px;
+  text-align: left;
+}
+.order-items-table th {
+  background: var(--dark-gray);
+  color: var(--primary-blue);
+  font-weight: bold;
+}
+.order-status-ordered { color: var(--light-blue); }
+.order-status-served { color: #4CAF50; }
+.order-status-paid { color: #888; }
+.order-status-cancelled { color: #F44336; }
+.detail-label { font-weight: bold; color: var(--primary-blue); }
+.detail-value { margin-left: 8px; color: #333; }
+.nav-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 25px;
+  justify-content: center;
+}
+.nav-btns button {
+  padding: 12px 25px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--light-blue);
+  color: var(--white);
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.nav-btns button:hover {
+  background-color: #1976D2;
+  transform: translateY(-2px);
+}
+.nav-btns button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+/* Clases específicas para botones */
+.btn-red { background-color: #F44336; }
+.btn-red:hover { background-color: #D32F2F; }
+.btn-gray { background-color: #607D8B; }
+.btn-gray:hover { background-color: #455A64; }
+
+/* Media Queries para Responsividad */
+@media (max-width: 1200px) {
+  .productos.panel-grid {
+    grid-template-columns: repeat(5, 1fr); /* 5 columnas para pantallas medianas */
+  }
+  #table-overview {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Ajustar minmax */
+  }
+  .familias.panel-grid,
+  .subfamilias.panel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Ajustar minmax */
+  }
+}
+
+@media (max-width: 1024px) {
+  .productos.panel-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas para tablets */
+  }
+  #table-overview {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Ajustar minmax */
+  }
+  .familias.panel-grid,
+  .subfamilias.panel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Ajustar minmax */
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 15px;
+  }
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .back-button {
+    margin-bottom: 15px;
+    width: 100%;
+  }
+  .logo-header {
+    width: 100%;
+  }
+  h1 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+  }
+  #table-overview {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Más pequeñas */
+    gap: 10px;
+  }
+  .table-card {
+    padding: 10px;
+    min-height: 80px;
+  }
+  .table-id {
+    font-size: 1.2em;
+  }
+  .table-status, .table-occupancy, .table-waiter, .table-time {
+    font-size: 0.75em;
+  }
+  #table-detail {
+    padding: 25px;
+  }
+  #table-detail h2 {
+    font-size: 1.5em;
+  }
+  .order-items-table th, .order-items-table td {
+    padding: 8px 10px;
+    font-size: 0.9em;
+  }
+  .nav-btns button {
+    padding: 10px 20px;
+    font-size: 1em;
+  }
+  .familias.panel-grid,
+  .subfamilias.panel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Aumentar minmax para más espacio */
+    gap: 10px;
+  }
+  .familias.panel-grid button,
+  .subfamilias.panel-grid button {
+    height: 48px; /* Altura fija para el tamaño táctil */
+    font-size: 0.7em; /* Fuente para legibilidad */
+    padding: 4px; /* Padding para mantener el tamaño */
+  }
+  .familias.panel-grid button .button-text,
+  .subfamilias.panel-grid button .button-text {
+    line-height: 1.2; /* Ajustar line-height */
+  }
+  .productos.panel-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas para móviles grandes */
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+  h1 {
+    font-size: 1.5em;
+  }
+  #table-overview {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Aún más pequeñas */
+    gap: 8px;
+  }
+  .table-card {
+    padding: 8px;
+    min-height: 70px;
+  }
+  .table-id {
+    font-size: 1.1em;
+  }
+  .table-status, .table-occupancy, .table-waiter, .table-time {
+    font-size: 0.7em;
+  }
+  #table-detail {
+    padding: 20px;
+  }
+  .nav-btns {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nav-btns button {
+    width: 100%;
+  }
+  h2 {
+    font-size: 1.5em;
+  }
+  h3 {
+    font-size: 1.2em;
+  }
+  button {
+    padding: 10px 15px;
+    font-size: 0.9em;
+  }
+  .panel-grid {
+    gap: 10px;
+  }
+  .familias.panel-grid,
+  .subfamilias.panel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* Aumentar minmax para más espacio */
+    gap: 8px;
+  }
+  .familias.panel-grid button,
+  .subfamilias.panel-grid button {
+    height: 48px; /* Altura fija para el tamaño táctil */
+    font-size: 0.65em; /* Fuente mínima */
+    padding: 3px; /* Padding para mantener el tamaño */
+  }
+  .familias.panel-grid button .button-text,
+  .subfamilias.panel-grid button .button-text {
+    line-height: 1.1; /* Ajustar line-height */
+  }
+  .productos.panel-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas para móviles pequeños */
+    gap: 10px;
+  }
+  .product-card {
+    padding: 10px;
+  }
+  .product-name {
+    font-size: 1em;
+  }
+  .product-price {
+    font-size: 0.9em;
+  }
+} 
