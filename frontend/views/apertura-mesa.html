@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Abrir Mesa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script src="/frontend/config.js"></script>
+  <link rel="stylesheet" href="/frontend/css/style.css">
+  <style>
+    body {
+      background-color: var(--light-gray);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .header-section {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0; /* Reducido a 0 para eliminar espacio */
+    }
+
+    h2{
+      text-align: center;
+    }
+
+    .back-button {
+      background-color: var(--light-blue);
+      color: var(--white);
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .back-button:hover {
+      background-color: #1976D2;
+    }
+
+    .logo-header {
+      text-align: center;
+      flex-grow: 1; /* Permite que el logo ocupe el espacio central */
+    }
+
+    .logo-header img {
+      max-width: 150px;
+      height: auto;
+    }
+
+    .logo-header .logo-text {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: var(--primary-blue);
+      margin-top: 5px;
+    }
+
+    .logo-header .tagline {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .form-group {
+      background-color: var(--white);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      margin-top: 0; /* Reducido a 0 para eliminar espacio */
+    }
+
+    input {
+      font-size: 2em;
+      padding: 12px 15px;
+      width: calc(100% - 30px); /* Ajusta el padding */
+      margin-bottom: 25px;
+      text-align: center;
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      outline: none;
+      color: var(--primary-blue);
+    }
+
+    input:focus {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+    }
+
+    .teclado {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); /* Columnas de igual ancho */
+      gap: 15px;
+      margin-top: 20px;
+      padding-right: 15px; /* Agregando padding a la derecha */
+    }
+
+    .teclado button {
+      font-size: 2em;
+      padding: 25px 0;
+      background-color: var(--dark-gray);
+      color: var(--primary-blue);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .teclado button:hover {
+      background-color: var(--medium-gray);
+    }
+
+    .botones-control {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+      gap: 10px;
+    }
+
+    .botones-control button {
+      flex-grow: 1;
+      padding: 15px;
+      font-size: 1.1em;
+    }
+
+    .botones-control .red-button {
+      background-color: #f44336; /* Rojo para Borrar */
+      color:white;
+
+    }
+
+    .botones-control .gray-button {
+      background-color: gray; /* Gris para Volver */
+      color:white;
+
+    }
+
+    .botones-control .green-button {
+      background-color: #4CAF50; /* Verde para Siguiente */
+      color:white;
+    }
+
+    .mensaje {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    /* Nuevo: Botón Flotante */
+    .floating-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background-color: var(--primary-color); /* Fondo azul */
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 1000;
+      transition: background-color 0.3s;
+      border: 2px solid white; /* Borde blanco */
+    }
+
+    .floating-button:hover {
+      background-color: var(--light-blue); /* Un azul más oscuro para el hover */
+    }
+
+    /* Nuevo: Overlay para mesas abiertas */
+    .tables-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0; /* Oculto por defecto */
+      pointer-events: none; /* No interactuable por defecto */
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .tables-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .tables-overlay-content {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      width: 90%;
+      max-width: 450px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .tables-overlay-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .tables-overlay-header h3 {
+      margin: 0;
+      color: var(--primary-color);
+    }
+
+    .overlay-close-button {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .open-table-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      font-size: 1.2em;
+      color: var(--text-color);
+      transition: background-color 0.2s;
+    }
+
+    .open-table-item:last-child {
+      border-bottom: none;
+    }
+
+    .open-table-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .empty-tables-message {
+      text-align: center;
+      color: #888;
+      padding: 20px;
+    }
+
+    /* Nueva clase para ocultar elementos */
+    .hidden {
+      display: none; /* Eliminado !important para permitir control por JS */
+    }
+
+    /* Media Queries para Responsividad */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      .form-group {
+        padding: 25px;
+      }
+      input {
+        font-size: 1.8em;
+        padding: 10px 12px;
+      }
+      .teclado button {
+        font-size: 1.8em;
+        padding: 20px 0;
+      }
+      .botones-control button {
+        font-size: 1em;
+        padding: 12px;
+    }
+      .logo-header img {
+        max-width: 120px;
+      }
+      .logo-header .logo-text {
+        font-size: 1em;
+      }
+      .logo-header .tagline {
+        font-size: 0.8em;
+      }
+      .floating-button {
+        width: 50px;
+        height: 50px;
+        font-size: 2em;
+        bottom: 15px;
+        right: 15px;
+      }
+      .tables-overlay-content {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .form-group {
+        padding: 20px;
+      }
+      input {
+        font-size: 1.5em;
+        padding: 8px 10px;
+      }
+      .teclado button {
+        font-size: 1.5em;
+        padding: 15px 0;
+      }
+      .botones-control button {
+        font-size: 0.9em;
+        padding: 10px;
+      }
+      .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .back-button {
+        margin-bottom: 15px;
+        width: 100%;
+      }
+      .logo-header {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header-section">
+    <button class="back-button" onclick="volverAInicio()">Volver al Inicio</button>
+    <div class="logo-header">
+      <h2 class="logo-text" style="margin-bottom: 2px;">FASTER CONSULTORES</h2>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="form-group">
+  <h2 id="etapaLabel" style="font-size:20px;">Ingrese código del garzón</h2>
+  <input type="text" id="inputCampo">
+      <div id="mensaje" class="mensaje hidden"></div>
+
+  <div class="teclado" id="teclado"></div>
+
+  <div class="botones-control">
+        <button class="red-button" onclick="borrar()">Borrar</button>
+        <button class="gray-button" onclick="volverAInicio()">Volver al Inicio</button>
+        <button class="green-button" onclick="siguienteEtapa()">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nuevo: Botón Flotante -->
+  <div id="floatingButton" class="floating-button hidden" onclick="openTablesOverlay()">🪑</div>
+
+  <!-- Nuevo: Overlay para Mesas Abiertas -->
+  <div id="tablesOverlay" class="tables-overlay">
+    <div class="tables-overlay-content">
+      <div class="tables-overlay-header">
+        <h3>Mis Mesas Abiertas</h3>
+        <button class="overlay-close-button" onclick="closeTablesOverlay()">×</button>
+      </div>
+      <div id="openTablesList"></div>
+    </div>
+  </div>
+
+  <script>
+    let etapa = 0;
+    const datos = { codigo: "", mesa: "", personas: "" };
+    const input = document.getElementById("inputCampo");
+    const label = document.getElementById("etapaLabel");
+    const mensajeDiv = document.getElementById("mensaje");
+    const floatingButton = document.getElementById('floatingButton');
+    const tablesOverlay = document.getElementById('tablesOverlay');
+    const openTablesList = document.getElementById('openTablesList');
+
+    const etapasTexto = [
+      "Ingrese código del garzón",
+      "Ingrese número de mesa",
+      "Ingrese cantidad de personas"
+    ];
+
+    const campos = ["codigo", "mesa", "personas"];
+
+    function actualizarVista() {
+      label.innerText = etapasTexto[etapa];
+      input.value = datos[campos[etapa]];
+      mensajeDiv.classList.add('hidden'); // Ocultar mensajes al cambiar de etapa
+      actualizarEstadoBotones(); // Actualizar estado de botones al cambiar de etapa
+
+      // [REMOVIDO] Llamar a la función para actualizar la visibilidad del botón flotante
+      // updateFloatingButtonVisibility();
+    }
+
+    async function siguienteEtapa() {
+      const valor = input.value.trim();
+      if (!valor) {
+        mostrarMensaje("Debe ingresar un valor.", "error");
+        return;
+      }
+      datos[campos[etapa]] = valor;
+
+      if (etapa === 0) { // Ingreso de código de garzón
+        localStorage.setItem('garzon', datos.codigo); // Guardar garzón
+        etapa++;
+        actualizarVista();
+        await updateFloatingButtonVisibility(); // [AÑADIDO] Mostrar botón después de confirmar garzón
+      } else if (etapa === 1) {
+        const mesaId = datos.mesa;
+        const garzonId = datos.codigo;
+
+        try {
+          const checkResponse = await fetch(`${BACKEND_BASE_URL}/mesas/${mesaId}`);
+          if (checkResponse.ok) {
+            const existingMesa = await checkResponse.json();
+            if (existingMesa.garzon !== garzonId) {
+              mostrarMensaje(`Mesa ${mesaId} ya está siendo atendida por ${existingMesa.garzon}.`, "error");
+              return;
+            } else {
+              // Mismo garzón reabriendo la mesa, no pedir personas, ir directo a pedidos
+              window.location.href = `pedidos.html?mesa=${mesaId}&garzon=${garzonId}&personas=${existingMesa.personas || 1}&horaApertura=${existingMesa.horaApertura || ''}`;
+              return;
+            }
+          } else if (checkResponse.status === 404) {
+            // Mesa no existe (es nueva), avanzar a la etapa de pedir cantidad de personas
+        etapa++;
+        actualizarVista();
+      } else {
+            const errorData = await checkResponse.json();
+            throw new Error(errorData.error || 'Error desconocido al verificar mesa existente.');
+          }
+        } catch (error) {
+          console.error('Error al verificar mesa:', error);
+          mostrarMensaje('No se pudo conectar al servidor para verificar la mesa existente.');
+        }
+
+      } else if (etapa === 2) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const horaApertura = `${hours}:${minutes}`;
+
+        // Primero, intentar registrar/bloquear la mesa en el backend
+        try {
+          const saveMesaResponse = await fetch(`${BACKEND_BASE_URL}/mesas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mesa: datos.mesa,
+              garzon: datos.codigo,
+              personas: datos.personas,
+              horaApertura: horaApertura,
+              productos: [] // Inicialmente, sin productos al abrir la mesa
+            })
+          });
+
+          if (!saveMesaResponse.ok) {
+            const errorData = await saveMesaResponse.json();
+            if (saveMesaResponse.status === 403) {
+              mostrarMensaje(`Error: ${errorData.error}`, 'error');
+              return; // Bloquear si la mesa ya está tomada por otro garzón
+            }
+            throw new Error(errorData.error || 'Error desconocido al registrar la mesa.');
+          }
+
+          // Si el registro de la mesa fue exitoso, entonces proceder a iniciar la comanda TXT
+          // Llamar al nuevo endpoint para iniciar el archivo TXT de la comanda
+          const iniciarComandaTxtResponse = await fetch(`${BACKEND_BASE_URL}/iniciar-comanda-txt`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ // Asegúrate de que horaApertura se pasa correctamente
+              mesa: datos.mesa,
+              garzon: datos.codigo,
+              personas: datos.personas,
+              horaApertura: horaApertura // Enviar la hora de apertura al backend
+            })
+          });
+
+          if (!iniciarComandaTxtResponse.ok) {
+            const errorData = await iniciarComandaTxtResponse.json();
+            throw new Error(errorData.error || 'Error al iniciar comanda TXT');
+          }
+          const txtMessage = (await iniciarComandaTxtResponse.json()).message;
+          console.log(txtMessage);
+          // Redirigir solo si la creación del TXT fue exitosa
+          window.location.href = `pedidos.html?mesa=${datos.mesa}&garzon=${datos.codigo}&personas=${datos.personas}&horaApertura=${horaApertura}`;
+
+        } catch (error) {
+          mostrarMensaje(`Error: ${error.message}`, 'error');
+          console.error('Error al procesar la apertura de mesa:', error);
+        }
+        return;
+      }
+      actualizarEstadoBotones(); // Asegurarse de que el estado se actualice después de cada etapa
+    }
+
+    function borrar() {
+      input.value = "";
+      mensajeDiv.classList.add('hidden'); // Ocultar mensaje al borrar
+      if (etapa === 0) { // Si estamos en la etapa de garzón
+        floatingButton.classList.add('hidden'); // Asegurar que el botón se oculta si se borra el garzón
+        closeTablesOverlay();
+      }
+    }
+
+    function volverAInicio() {
+      // Resetear los datos para asegurar un estado limpio
+      datos.codigo = "";
+      datos.mesa = "";
+      datos.personas = "";
+      etapa = 0; // Volver a la etapa inicial
+
+      // Redirigir a la página de inicio
+      window.location.href = 'inicio.html';
+    }
+
+    function mostrarMensaje(msg, type) {
+      mensajeDiv.textContent = msg;
+      mensajeDiv.className = `mensaje ${type}`;
+      mensajeDiv.classList.remove('hidden');
+    }
+
+    function actualizarEstadoBotones() {
+      const headerBackButton = document.querySelector('.header-section .back-button');
+      const controlBackButton = document.querySelector('.botones-control .gray-button');
+
+      if (etapa > 0) { // Si ya se ingresó el garzón, deshabilitar los botones de volver
+        if (headerBackButton) {
+          headerBackButton.disabled = true;
+          headerBackButton.style.opacity = '0.5';
+          headerBackButton.style.cursor = 'not-allowed';
+        }
+        if (controlBackButton) {
+          controlBackButton.disabled = true;
+          controlBackButton.style.opacity = '0.5';
+          controlBackButton.style.cursor = 'not-allowed';
+        }
+      } else {
+        if (headerBackButton) {
+          headerBackButton.disabled = false;
+          headerBackButton.style.opacity = '1';
+          headerBackButton.style.cursor = 'pointer';
+        }
+        if (controlBackButton) {
+          controlBackButton.disabled = false;
+          controlBackButton.style.opacity = '1';
+          controlBackButton.style.cursor = 'pointer';
+        }
+      }
+    }
+
+    function agregarTeclado() {
+      const cont = document.getElementById("teclado");
+      const teclas = ['1','2','3','4','5','6','7','8','9','←','0'];
+      teclas.forEach(tecla => {
+        const btn = document.createElement("button");
+        btn.textContent = tecla;
+        btn.onclick = () => {
+          console.log(`Tecla presionada: ${tecla}`); // Debug: Log al presionar la tecla
+          if (tecla === '←') {
+            input.value = input.value.slice(0, -1);
+          } else {
+            input.value += tecla;
+          }
+          // Actualizar el valor en el objeto 'datos' para que se persista
+          datos[campos[etapa]] = input.value;
+          console.log(`Valor del input actualizado: ${input.value}`); // Debug: Log del valor del input
+          actualizarVista();
+        };
+        cont.appendChild(btn);
+      });
+    }
+
+    // Nuevo: Funciones para el overlay de mesas abiertas
+    async function openTablesOverlay() {
+      if (!datos.codigo) {
+        mostrarMensaje("Ingrese primero su código de garzón.", "error");
+        return;
+      }
+      openTablesList.innerHTML = '<div class="empty-tables-message">Cargando mesas...</div>';
+      tablesOverlay.classList.add('show'); // Mostrar el overlay con la clase 'show'
+
+      try {
+        const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
+        if (!response.ok) {
+          throw new Error('Error al cargar las mesas abiertas.');
+        }
+        const allMesas = await response.json();
+        const garzonMesas = Object.values(allMesas).filter(mesa => mesa.garzon === datos.codigo);
+
+        openTablesList.innerHTML = '';
+        if (garzonMesas.length === 0) {
+          openTablesList.innerHTML = '<div class="empty-tables-message">No tienes mesas abiertas actualmente.</div>';
+        } else {
+          garzonMesas.sort((a, b) => parseInt(a.mesa) - parseInt(b.mesa));
+          garzonMesas.forEach(mesa => {
+            const item = document.createElement('div');
+            item.className = 'open-table-item';
+            // Mostrar número de mesa y cantidad de personas si está disponible
+            item.innerText = `Mesa ${mesa.mesa}` + (mesa.personas ? ` (${mesa.personas} pers)` : '');
+            item.onclick = () => goToPedidos(mesa);
+            openTablesList.appendChild(item);
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar mesas del garzón:', error);
+        openTablesList.innerHTML = `<div class="empty-tables-message" style="color: #D32F2F;">Error al cargar mesas: ${error.message}</div>`;
+      }
+    }
+
+    function closeTablesOverlay() {
+      tablesOverlay.classList.remove('show'); // Ocultar el overlay removiendo la clase 'show'
+    }
+
+    function goToPedidos(mesaData) {
+      // Redirigir a pedidos.html pasando los datos de la mesa
+      window.location.href = `pedidos.html?mesa=${mesaData.mesa}&garzon=${mesaData.garzon}&personas=${mesaData.personas || 1}&horaApertura=${mesaData.horaApertura || ''}`;
+    }
+
+    // Nueva función para controlar la visibilidad del botón flotante y cargar mesas
+    async function updateFloatingButtonVisibility() {
+      console.log(`[updateFloatingButtonVisibility] Ejecutando para garzón: ${datos.codigo}`);
+      if (!datos.codigo) {
+        floatingButton.classList.add('hidden');
+        closeTablesOverlay();
+        console.log(`[updateFloatingButtonVisibility] Garzón no definido, ocultando botón.`);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
+        if (!response.ok) {
+          throw new Error('Error al cargar las mesas abiertas para verificar el botón.');
+        }
+        const allMesas = await response.json();
+        const garzonMesas = Object.values(allMesas).filter(mesa => mesa.garzon === datos.codigo);
+
+        if (garzonMesas.length > 0) {
+          floatingButton.classList.remove('hidden');
+          floatingButton.style.display = 'flex';
+          floatingButton.style.border = ''; // Limpiar estilos de depuración
+          floatingButton.style.background = ''; // Limpiar estilos de depuración
+          console.log(`[updateFloatingButtonVisibility] Garzón ${datos.codigo} tiene mesas abiertas, mostrando botón.`);
+          console.log(`[updateFloatingButtonVisibility] floatingButton.style.display: ${floatingButton.style.display}`);
+        } else {
+          floatingButton.classList.add('hidden');
+          floatingButton.style.display = 'none';
+          floatingButton.style.border = ''; // Limpiar estilos de depuración
+          floatingButton.style.background = ''; // Limpiar estilos de depuración
+          closeTablesOverlay();
+          console.log(`[updateFloatingButtonVisibility] Garzón ${datos.codigo} NO tiene mesas abiertas, ocultando botón.`);
+          console.log(`[updateFloatingButtonVisibility] floatingButton.style.display: ${floatingButton.style.display}`);
+        }
+      } catch (error) {
+        console.error(`[updateFloatingButtonVisibility] Error al verificar mesas del garzón:`, error);
+        floatingButton.classList.add('hidden');
+        floatingButton.style.display = 'none';
+        closeTablesOverlay();
+      }
+    }
+
+    // Cargar garzón guardado al inicio
+    // const garzonGuardado = localStorage.getItem('garzon');
+    // if (garzonGuardado) {
+    //   datos.codigo = garzonGuardado;
+    //   input.value = garzonGuardado;
+    //   etapa = 1; // Si hay garzón, saltar a pedir mesa
+    //   actualizarVista();
+    // } else {
+    //   actualizarVista();
+    // }
+
+    actualizarVista(); // Iniciar siempre pidiendo el garzón
+    agregarTeclado();
+    // actualizarEstadoBotones(); // Ya se llama dentro de actualizarVista
+  </script>
+</body>
+</html>

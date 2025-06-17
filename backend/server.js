@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
@@ -93,12 +93,20 @@ let lastModifiedTime = 0; // Marca de tiempo de la última modificación de prod
 app.use(cors());
 app.use(express.json());
 
+app.use('/frontend/css', express.static(path.join(__dirname, '..', 'frontend', 'css'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
 // Servir archivos estáticos desde la carpeta principal del proyecto
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..', '/frontend/views/')));
 
 // Redirigir la raíz a inicio.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'inicio.html'));
+  res.sendFile(path.join(__dirname, '..', '/frontend/views/inicio.html'));
 });
 
 // Leer todas las mesas abiertas
@@ -763,7 +771,7 @@ app.post('/iniciar-comanda-txt', (req, res) => {
 app.get('/modificadores', (req, res) => {
   console.log('[GET /modificadores Debug] Solicitud recibida para cargar modificadores.');
   try {
-    const modificadoresPath = path.join(__dirname, '..', 'modificadores.json');
+    const modificadoresPath = path.join(__dirname, 'modificadores.json');
     
     if (!fs.existsSync(modificadoresPath)) {
       console.log('[GET /modificadores Debug] Archivo de modificadores no encontrado, creando uno nuevo.');
@@ -807,7 +815,7 @@ app.post('/modificadores', (req, res) => {
   console.log('[POST /modificadores Debug] Solicitud recibida para guardar modificadores.');
   try {
     const modificadores = req.body;
-    const modificadoresPath = path.join(__dirname, '..', 'modificadores.json');
+    const modificadoresPath = path.join(__dirname, 'modificadores.json');
     
     // Validar la estructura de los modificadores
     if (!Array.isArray(modificadores)) {
