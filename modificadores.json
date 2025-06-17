@@ -1,0 +1,22 @@
+[
+  {
+    "tipo": "producto",
+    "codigo": "720",
+    "pregunta": "¿Punto de cocción?",
+    "opciones": [
+      "Inglesa",
+      "A Punto",
+      "3/4",
+      "Bien cocido"
+    ]
+  },
+  {
+    "tipo": "subfamilia",
+    "codigo": "0102",
+    "pregunta": "¿Desea queso?",
+    "opciones": [
+      "SIN PEPINILLOS",
+      "SIN QUESO"
+    ]
+  }
+]

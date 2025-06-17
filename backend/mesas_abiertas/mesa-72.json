@@ -1,0 +1,17 @@
+{
+  "mesa": "72",
+  "garzon": "17",
+  "productos": [
+    {
+      "codigo": 705,
+      "nombre": "CHORIPAPAS",
+      "precio": 9000,
+      "familia": "ALIMENTOS",
+      "subfamilia": "PAPAS KIDS",
+      "cantidad": 1,
+      "message": ""
+    }
+  ],
+  "personas": "72",
+  "horaApertura": "14:46"
+}

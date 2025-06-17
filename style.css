@@ -1,58 +1,283 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Evita el scroll global */
+  box-sizing: border-box; /* Incluye padding y borde en el tamaño total */
+}
+
 :root {
-  --primary-blue: #1A237E; /* Un azul oscuro para la marca */
-  --light-blue: #2196F3;  /* Un celeste vibrante */
+  --primary-color: #2196F3; /* Azul primario, unificado de light-blue */
+  --secondary-color: #4CAF50; /* Verde secundario, unificado de dark-green */
+  --background-color: #f5f5f5; /* Fondo general */
+  --text-color: #333; /* Color de texto principal */
+  --border-color: #ddd; /* Color de borde */
+  --button-height: 48px; /* Altura mínima de botones táctiles */
+  --header-height: 60px; /* Altura del encabezado */
+  --primary-blue: #1A237E; /* Azul oscuro para la marca */
+  --light-blue: #2196F3;  /* Un celeste vibrante, coincide con primary-color */
+  --dark-green: #2E7D32; /* Verde oscuro, coincide con secondary-color */
+  --light-green: #4CAF50; /* Verde más claro */
   --white: #FFFFFF;
-  --light-gray: #f9f9f9;
+  --light-gray: #F5F5F5;
   --medium-gray: #ddd;
   --dark-gray: #eee;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente moderna y legible */
-  padding: 20px;
-  background-color: var(--light-gray);
-  margin: 0;
-  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
   line-height: 1.6;
-  text-align: center; /* Alineación central para todo el body */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* Eliminar padding y margin directos del body si ya se usan en html,body */
+  /* padding: 0; margin: 0; */
 }
 
+/* Estilos de encabezado unificados para Pedidos.html */
+.header {
+  height: var(--header-height);
+  background: var(--primary-color);
+  color: white;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%; /* Ocupa todo el ancho */
+  z-index: 1000;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* Contenedor principal para la estructura de Pedidos.html */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-height)); /* Ocupa el espacio restante */
+  width: 100%;
+}
+
+.order-section {
+  height: 50vh;
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  overflow-y: auto; /* Permite scroll solo en esta sección */
+  padding: 16px;
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-table th,
+.order-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.product-section {
+  flex: 1; /* Ocupa el espacio restante verticalmente */
+  display: flex;
+  flex-direction: column;
+  background: white;
+  position: relative; /* Para posicionar el products-panel */
+}
+
+.family-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+.family-button {
+  height: var(--button-height);
+  border: none;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.family-button:active {
+  transform: scale(0.98);
+  background: #f0f0f0;
+}
+
+.products-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+  max-height: 80vh;
+  overflow-y: auto; /* Permite scroll solo en el panel de productos */
+  z-index: 999; /* Asegura que esté sobre la cuadrícula de familias */
+}
+
+.products-panel.active {
+  transform: translateY(0);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.product-price {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.add-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-button:active {
+  background: #1976D2;
+}
+
+.action-buttons {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 24px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.send-button {
+  background: var(--secondary-color);
+}
+
+.update-button {
+  background: var(--primary-color);
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: var(--primary-color);
+  color: white;
+  cursor: pointer;
+}
+
+.remove-button {
+  color: #dc3545;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Secciones genéricas que pueden aplicarse a otros HTML */
 h2, h3 {
   color: var(--primary-blue);
   margin-bottom: 15px;
 }
 
-/* Header Section common for many pages */
-.header-section {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.back-button {
-  background-color: var(--light-blue);
-  color: var(--white);
+button {
   padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 8px;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.2s;
 }
 
-.back-button:hover {
-  background-color: #1976D2;
+button:hover {
+  opacity: 0.9;
+}
+
+button:active {
+  transform: translateY(1px);
 }
 
 .logo-header {
   text-align: center;
-  flex-grow: 1; /* Permite que el logo ocupe el espacio central */
+  flex-grow: 1;
 }
 
 .logo-header img {
@@ -62,210 +287,45 @@ h2, h3 {
 
 .logo-header .logo-text {
   font-size: 1.2em;
-  font-weight: bold;
-  color: var(--primary-blue);
-  margin-top: 5px;
 }
 
 .logo-header .tagline {
-  font-size: 0.9em;
-  color: #555;
+  font-size: 0.8em;
+  color: #666;
 }
 
 h1 {
-  margin-top: 0;
-  margin-bottom: 25px;
-  font-size: 2.2em;
+  font-size: 2em;
   color: var(--primary-blue);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-/* Estilos para botones */
-button {
-  padding: 15px 25px;
-  font-size: 1.1em;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background-color: var(--light-blue);
-  color: var(--white);
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  white-space: nowrap; /* Evita que el texto se rompa */
-}
-
-button:hover {
-  background-color: #1976D2; /* Un tono más oscuro de celeste */
-  transform: translateY(-2px);
-}
-
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-/* Estilos para el logo */
-.logo {
-  text-align: center;
   margin-bottom: 30px;
 }
 
-.main-content {
-  max-width: 1200px; /* Ancho máximo para el contenido principal */
-  margin: 0 auto; /* Centrar el contenido */
-  padding: 0 20px; /* Padding horizontal para evitar que el contenido toque los bordes */
-  width: 100%; /* Asegura que ocupe todo el ancho disponible hasta el max-width */
-  box-sizing: border-box; /* Incluye padding en el width */
-}
+/* Limpieza de estilos duplicados/antiguos */
+/* Secciones como .main-content, .panel-grid, .product-card, .add-product-btn,
+.comanda-table, .action-buttons, .btn-green, .btn-blue, .hidden, #logEnvio
+fueron movidas o sus equivalentes más específicos fueron creados arriba.
+Las siguientes son las reglas que deberían mantenerse si son genéricas o
+afectan a otros archivos HTML. */
 
-.logo img {
-  max-width: 250px; /* Tamaño máximo para el logo */
-  height: auto;
-}
-
-.logo-text {
-  font-size: 1.8em;
-  font-weight: bold;
-  color: var(--primary-blue);
-  margin-top: 10px;
-}
-
-.tagline {
-  font-size: 1.1em;
-  color: #555;
-}
-
-/* Estilos generales para paneles (familias, productos) */
-.panel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Aumentar minmax por defecto */
-  gap: 15px;
-  margin-bottom: 20px;
-  justify-content: flex-start;
-  width: 100%;
-}
-
-/* Estilos específicos para los botones dentro de Familias y Subfamilias */
-.familias.panel-grid button,
-.subfamilias.panel-grid button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-width: 48px; /* Mínimo de 48px de ancho táctil */
-  min-height: 48px; /* Mínimo de 48px de alto táctil */
-  height: 48px; /* Altura fija para uniformidad y tamaño táctil */
-  padding: 5px; /* Padding reducido para maximizar espacio de texto */
-  font-size: 0.8em; /* Fuente para mejor legibilidad */
-  box-sizing: border-box;
-}
-
-.familias.panel-grid button .button-text,
-.subfamilias.panel-grid button .button-text {
-  display: block;
-  width: 100%;
-  min-width: 0; /* Permitir que el texto se encoja */
-  flex-shrink: 1;
-  flex-grow: 0; /* Asegurar que el texto no intente crecer */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-  line-height: 1.2; /* Ajustar line-height para legibilidad */
-}
-
-/* Estilos para las tarjetas de producto (Product Cards) */
-.product-card {
-  background-color: var(--white);
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  box-sizing: border-box; /* Incluye padding y border en el width */
-  transition: transform 0.2s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.product-name {
-  font-size: 1.1em;
-  font-weight: bold;
-  color: var(--primary-blue);
-  margin-bottom: 8px;
-  flex-grow: 1; /* Permite que el nombre ocupe el espacio */
-}
-
-.product-price {
-  font-size: 1em;
-  color: #555;
-  margin-bottom: 12px;
-}
-
-.add-product-btn {
-  padding: 10px 15px;
-  font-size: 0.9em;
-  background-color: #4CAF50;
-  color: var(--white);
-  border-radius: 6px;
-  box-shadow: none;
-  min-width: 48px; /* Mínimo de 48px de ancho táctil */
-  min-height: 48px; /* Mínimo de 48px de alto táctil */
-  height: 48px; /* Altura fija para uniformidad y tamaño táctil */
-}
-
-.add-product-btn:hover {
-  background-color: #388E3C;
-  transform: translateY(-1px);
-}
-
-.add-product-btn:active {
-  transform: translateY(0);
-}
-
-/* Ajustes para el panel de productos para la cuadrícula */
-.productos.panel-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr); /* 6 columnas para pantallas grandes */
-  gap: 15px;
-  margin-bottom: 25px;
-  width: 100%;
-}
-
-/* Estilos para el overview de mesas */
+/* Estilos para las tarjetas de mesa (si aplican a mesas-abiertas.html) */
 #table-overview {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Más pequeñas */
-  gap: 15px; /* Espacio más compacto */
-  margin: 0 auto 30px auto;
-  max-width: 1200px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .table-card {
-  background: var(--white);
-  border-radius: 10px; /* Bordes más redondeados */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra más suave */
-  padding: 15px; /* Reducir padding */
-  min-height: 100px; /* Reducir altura mínima */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background-color: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 2px 5px var(--shadow-color);
+  padding: 15px;
+  text-align: center;
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
-  border: 3px solid transparent;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .table-card[data-status="open"] { border-color: #4CAF50; }
@@ -274,262 +334,192 @@ button:active {
 .table-card[data-status="cleaning"] { border-color: #FF9800; }
 
 .table-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  transform: translateY(-3px) scale(1.02); /* Efecto hover más sutil */
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px var(--shadow-color);
 }
 
 .table-id {
-  font-size: 1.4em; /* Reducir tamaño de fuente */
+  font-size: 2em;
   font-weight: bold;
-  margin-bottom: 5px;
   color: var(--primary-blue);
+  margin-bottom: 10px;
 }
 
 .table-status {
-  font-size: 0.9em; /* Reducir tamaño de fuente */
-  margin-bottom: 4px;
-  text-transform: capitalize;
-  color: #555;
+  font-size: 0.9em;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 
 .table-occupancy,
 .table-waiter,
 .table-time {
-  font-size: 0.8em; /* Reducir tamaño de fuente */
-  color: #777;
-  margin-bottom: 3px;
+  font-size: 0.8em;
+  color: #666;
 }
 
-/* Detail view */
+/* Estilos para el detalle de la mesa (si aplica a mesas-abiertas.html) */
 #table-detail {
-  display: none;
-  max-width: 700px;
-  margin: 40px auto;
-  background: var(--white);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 32px;
-  text-align: left;
-  position: relative;
+  background-color: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 2px 5px var(--shadow-color);
+  padding: 20px;
+  margin-top: 20px;
 }
+
 #table-detail h2 {
   margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 1.8em;
-  color: var(--primary-blue);
+  margin-bottom: 20px;
 }
+
 .order-items-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
-  background-color: var(--light-gray);
-  border-radius: 8px;
-  overflow: hidden;
 }
+
 .order-items-table th, .order-items-table td {
   border: 1px solid var(--medium-gray);
-  padding: 10px 12px;
+  padding: 8px;
   text-align: left;
 }
+
 .order-items-table th {
-  background: var(--dark-gray);
-  color: var(--primary-blue);
+  background-color: var(--dark-gray);
   font-weight: bold;
 }
+
 .order-status-ordered { color: var(--light-blue); }
 .order-status-served { color: #4CAF50; }
 .order-status-paid { color: #888; }
 .order-status-cancelled { color: #F44336; }
+
 .detail-label { font-weight: bold; color: var(--primary-blue); }
 .detail-value { margin-left: 8px; color: #333; }
+
 .nav-btns {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-around;
   gap: 15px;
-  margin-top: 25px;
-  justify-content: center;
+  margin-top: 20px;
 }
+
 .nav-btns button {
+  flex-grow: 1;
   padding: 12px 25px;
-  font-size: 1.1em;
-  border: none;
   border-radius: 8px;
-  background-color: var(--light-blue);
-  color: var(--white);
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  text-align: center;
 }
+
 .nav-btns button:hover {
-  background-color: #1976D2;
+  opacity: 0.9;
   transform: translateY(-2px);
 }
+
 .nav-btns button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transform: translateY(1px);
 }
-/* Clases específicas para botones */
+
 .btn-red { background-color: #F44336; }
 .btn-red:hover { background-color: #D32F2F; }
 .btn-gray { background-color: #607D8B; }
 .btn-gray:hover { background-color: #455A64; }
 
-/* Media Queries para Responsividad */
+/* Media Queries for Responsiveness */
 @media (max-width: 1200px) {
   .productos.panel-grid {
-    grid-template-columns: repeat(5, 1fr); /* 5 columnas para pantallas medianas */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   }
   #table-overview {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Ajustar minmax */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
   .familias.panel-grid,
-  .subfamilias.panel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Ajustar minmax */
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 }
 
 @media (max-width: 1024px) {
   .productos.panel-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 columnas para tablets */
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
   #table-overview {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Ajustar minmax */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
   .familias.panel-grid,
-  .subfamilias.panel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Ajustar minmax */
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
   body {
-    padding: 15px;
+    padding: 10px;
   }
   .header-section {
     flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 20px;
+    padding: 10px;
   }
   .back-button {
-    margin-bottom: 15px;
-    width: 100%;
+    margin-bottom: 10px;
   }
   .logo-header {
-    width: 100%;
+    margin-bottom: 15px;
   }
   h1 {
-    font-size: 1.8em;
-    margin-bottom: 20px;
+    font-size: 1.6em;
   }
   #table-overview {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Más pequeñas */
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
   .table-card {
     padding: 10px;
-    min-height: 80px;
   }
   .table-id {
-    font-size: 1.2em;
+    font-size: 1.6em;
   }
   .table-status, .table-occupancy, .table-waiter, .table-time {
     font-size: 0.75em;
   }
   #table-detail {
-    padding: 25px;
+    padding: 15px;
   }
   #table-detail h2 {
-    font-size: 1.5em;
+    font-size: 1.4em;
   }
   .order-items-table th, .order-items-table td {
-    padding: 8px 10px;
-    font-size: 0.9em;
+    font-size: 0.8em;
+    padding: 6px;
   }
   .nav-btns button {
     padding: 10px 20px;
-    font-size: 1em;
-  }
-  .familias.panel-grid,
-  .subfamilias.panel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Aumentar minmax para más espacio */
-    gap: 10px;
-  }
-  .familias.panel-grid button,
-  .subfamilias.panel-grid button {
-    height: 48px; /* Altura fija para el tamaño táctil */
-    font-size: 0.7em; /* Fuente para legibilidad */
-    padding: 4px; /* Padding para mantener el tamaño */
-  }
-  .familias.panel-grid button .button-text,
-  .subfamilias.panel-grid button .button-text {
-    line-height: 1.2; /* Ajustar line-height */
-  }
-  .productos.panel-grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas para móviles grandes */
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    padding: 10px;
-  }
-  h1 {
-    font-size: 1.5em;
-  }
-  #table-overview {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Aún más pequeñas */
-    gap: 8px;
-  }
-  .table-card {
-    padding: 8px;
-    min-height: 70px;
-  }
-  .table-id {
-    font-size: 1.1em;
-  }
-  .table-status, .table-occupancy, .table-waiter, .table-time {
-    font-size: 0.7em;
-  }
-  #table-detail {
-    padding: 20px;
-  }
-  .nav-btns {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .nav-btns button {
-    width: 100%;
-  }
-  h2 {
-    font-size: 1.5em;
-  }
-  h3 {
-    font-size: 1.2em;
-  }
-  button {
-    padding: 10px 15px;
     font-size: 0.9em;
   }
-  .panel-grid {
-    gap: 10px;
-  }
   .familias.panel-grid,
-  .subfamilias.panel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* Aumentar minmax para más espacio */
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 8px;
+    padding: 10px;
   }
   .familias.panel-grid button,
-  .subfamilias.panel-grid button {
-    height: 48px; /* Altura fija para el tamaño táctil */
-    font-size: 0.65em; /* Fuente mínima */
-    padding: 3px; /* Padding para mantener el tamaño */
+  .category-button {
+    min-height: 60px;
+    padding: 10px;
+    font-size: 1em;
   }
   .familias.panel-grid button .button-text,
-  .subfamilias.panel-grid button .button-text {
-    line-height: 1.1; /* Ajustar line-height */
+  .category-button .button-text {
+    font-size: 0.8em;
   }
   .productos.panel-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas para móviles pequeños */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 10px;
   }
   .product-card {
@@ -540,5 +530,102 @@ button:active {
   }
   .product-price {
     font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 5px;
+  }
+  h1 {
+    font-size: 1.4em;
+  }
+  #table-overview {
+    grid-template-columns: 1fr;
+  }
+  .table-card {
+    width: 95%;
+    margin: 0 auto;
+  }
+  .table-id {
+    font-size: 1.4em;
+  }
+  .table-status, .table-occupancy, .table-waiter, .table-time {
+    font-size: 0.7em;
+  }
+  #table-detail {
+    padding: 10px;
+  }
+  .nav-btns {
+    flex-direction: column;
+  }
+  .nav-btns button {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  h2 {
+    font-size: 1.2em;
+  }
+  h3 {
+    font-size: 1em;
+  }
+  button {
+    padding: 8px 15px;
+    font-size: 0.9em;
+  }
+  .panel-grid {
+    gap: 5px;
+  }
+  .familias.panel-grid,
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+  .familias.panel-grid button,
+  .category-button {
+    min-height: 50px;
+    padding: 8px;
+    font-size: 0.9em;
+  }
+  .familias.panel-grid button .button-text,
+  .category-button .button-text {
+    font-size: 0.7em;
+  }
+  .productos.panel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+  .product-card {
+    padding: 8px;
+  }
+  .product-name {
+    font-size: 0.9em;
+  }
+  .product-price {
+    font-size: 0.8em;
+  }
+}
+
+/* Estilos para pantallas táctiles (general) */
+@media (pointer: coarse) {
+  .btn,
+  .card,
+  .category-button,
+  .add-product-btn,
+  .current-order-table .quantity-btn,
+  .current-order-table .remove-btn {
+    cursor: default; /* Elimina el cursor de puntero */
+  }
+  
+  /* Asegura que los botones tienen un área de toque suficientemente grande */
+  .btn,
+  .category-button {
+    min-height: 48px; /* Altura mínima para fácil toque */
+    padding: 15px; /* Aumenta el padding para el área de toque */
+  }
+
+  .add-product-btn,
+  .current-order-table .quantity-btn,
+  .current-order-table .remove-btn {
+    min-width: 48px;
+    min-height: 48px;
   }
 } 

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Modificadores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="config.js"></script>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #4CAF50;
+            --danger-color: #f44336;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .modificadores-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .modificador-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modificador-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modificador-tipo {
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #e3f2fd;
+            color: var(--primary-color);
+        }
+
+        .modificador-codigo {
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .modificador-pregunta {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .modificador-opciones {
+            list-style: none;
+        }
+
+        .modificador-opcion {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .opciones-container {
+            margin-top: 10px;
+        }
+
+        .opcion-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .opcion-item input {
+            flex: 1;
+        }
+
+        .opcion-item button {
+            padding: 8px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Gestión de Modificadores</h1>
+        <div class="actions">
+            <button class="btn btn-primary" onclick="showModal()">Nuevo Modificador</button>
+            <button class="btn btn-success" onclick="saveModificadores()">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <div class="modificadores-container" id="modificadoresContainer">
+        <!-- Los modificadores se cargarán aquí -->
+    </div>
+
+    <!-- Modal para crear/editar modificador -->
+    <div class="modal" id="modificadorModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nuevo Modificador</h2>
+            <form id="modificadorForm">
+                <div class="form-group">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" required>
+                        <option value="producto">Producto</option>
+                        <option value="subfamilia">Subfamilia</option>
+                        <option value="familia">Familia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="codigo">Código</label>
+                    <input type="text" id="codigo" required>
+                </div>
+                <div class="form-group">
+                    <label for="pregunta">Pregunta</label>
+                    <input type="text" id="pregunta" required>
+                </div>
+                <div class="form-group">
+                    <label>Opciones</label>
+                    <div class="opciones-container" id="opcionesContainer">
+                        <div class="opcion-item">
+                            <input type="text" placeholder="Nueva opción" required>
+                            <button type="button" onclick="removeOpcion(this)">×</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="addOpcion()">Agregar Opción</button>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="hideModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let modificadores = [];
+        let editingIndex = -1;
+
+        // Cargar modificadores al iniciar
+        async function loadModificadores() {
+            try {
+                const response = await fetch(`${BACKEND_BASE_URL}/modificadores`);
+                if (!response.ok) throw new Error('Error al cargar modificadores');
+                modificadores = await response.json();
+                renderModificadores();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar los modificadores');
+            }
+        }
+
+        // Renderizar modificadores en el contenedor
+        function renderModificadores() {
+            const container = document.getElementById('modificadoresContainer');
+            container.innerHTML = '';
+
+            modificadores.forEach((mod, index) => {
+                const card = document.createElement('div');
+                card.className = 'modificador-card';
+                card.innerHTML = `
+                    <div class="modificador-header">
+                        <span class="modificador-tipo">${mod.tipo}</span>
+                        <span class="modificador-codigo">${mod.codigo}</span>
+                    </div>
+                    <div class="modificador-pregunta">${mod.pregunta}</div>
+                    <ul class="modificador-opciones">
+                        ${mod.opciones.map(opcion => `
+                            <li class="modificador-opcion">${opcion}</li>
+                        `).join('')}
+                    </ul>
+                    <div class="actions">
+                        <button class="btn btn-primary" onclick="editModificador(${index})">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteModificador(${index})">Eliminar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Mostrar modal para nuevo/editar modificador
+        function showModal(index = -1) {
+            editingIndex = index;
+            const modal = document.getElementById('modificadorModal');
+            const form = document.getElementById('modificadorForm');
+            const title = document.getElementById('modalTitle');
+
+            if (index >= 0) {
+                // Modo edición
+                const mod = modificadores[index];
+                title.textContent = 'Editar Modificador';
+                document.getElementById('tipo').value = mod.tipo;
+                document.getElementById('codigo').value = mod.codigo;
+                document.getElementById('pregunta').value = mod.pregunta;
+                
+                const opcionesContainer = document.getElementById('opcionesContainer');
+                opcionesContainer.innerHTML = '';
+                mod.opciones.forEach(opcion => {
+                    addOpcion(opcion);
+                });
+            } else {
+                // Modo nuevo
+                title.textContent = 'Nuevo Modificador';
+                form.reset();
+                const opcionesContainer = document.getElementById('opcionesContainer');
+                opcionesContainer.innerHTML = `
+                    <div class="opcion-item">
+                        <input type="text" placeholder="Nueva opción" required>
+                        <button type="button" onclick="removeOpcion(this)">×</button>
+                    </div>
+                `;
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Ocultar modal
+        function hideModal() {
+            document.getElementById('modificadorModal').classList.remove('active');
+            editingIndex = -1;
+        }
+
+        // Agregar campo de opción
+        function addOpcion(value = '') {
+            const container = document.getElementById('opcionesContainer');
+            const div = document.createElement('div');
+            div.className = 'opcion-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Nueva opción" value="${value}" required>
+                <button type="button" onclick="removeOpcion(this)">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Eliminar campo de opción
+        function removeOpcion(button) {
+            const container = document.getElementById('opcionesContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+
+        // Editar modificador
+        function editModificador(index) {
+            showModal(index);
+        }
+
+        // Eliminar modificador
+        function deleteModificador(index) {
+            if (confirm('¿Estás seguro de eliminar este modificador?')) {
+                modificadores.splice(index, 1);
+                renderModificadores();
+            }
+        }
+
+        // Guardar modificadores en el backend
+        async function saveModificadores() {
+            try {
+                const response = await fetch(`${BACKEND_BASE_URL}/modificadores`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(modificadores)
+                });
+
+                if (!response.ok) throw new Error('Error al guardar modificadores');
+                
+                alert('Modificadores guardados exitosamente');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar los modificadores');
+            }
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('modificadorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const tipo = document.getElementById('tipo').value;
+            const codigo = document.getElementById('codigo').value;
+            const pregunta = document.getElementById('pregunta').value;
+            const opciones = Array.from(document.querySelectorAll('#opcionesContainer input'))
+                .map(input => input.value)
+                .filter(value => value.trim() !== '');
+
+            const modificador = {
+                tipo,
+                codigo,
+                pregunta,
+                opciones
+            };
+
+            if (editingIndex >= 0) {
+                modificadores[editingIndex] = modificador;
+            } else {
+                modificadores.push(modificador);
+            }
+
+            renderModificadores();
+            hideModal();
+        });
+
+        // Cargar modificadores al iniciar
+        document.addEventListener('DOMContentLoaded', loadModificadores);
+    </script>
+</body>
+</html> 

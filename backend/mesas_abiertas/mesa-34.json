@@ -1,0 +1,26 @@
+{
+  "mesa": "34",
+  "garzon": "2",
+  "productos": [
+    {
+      "codigo": 701,
+      "nombre": "PAPAS BASTON 650GR",
+      "precio": 8500,
+      "familia": "ALIMENTOS",
+      "subfamilia": "PAPAS KIDS",
+      "cantidad": 1,
+      "message": ""
+    },
+    {
+      "codigo": 653,
+      "nombre": "PAPAS BRAVAS KG",
+      "precio": 10990,
+      "familia": "ALIMENTOS",
+      "subfamilia": "PAPAS FRITAS",
+      "cantidad": 1,
+      "message": ""
+    }
+  ],
+  "personas": "2",
+  "horaApertura": null
+}

@@ -2,58 +2,318 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mesas del Restaurante</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesas Abiertas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="config.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --primary-color: #2196F3;
+      --secondary-color: #4CAF50;
+      --background-color: #f5f5f5;
+      --text-color: #333;
+      --border-color: #ddd;
+      --button-height: 48px;
+      --header-height: 60px;
+      --shadow-color: rgba(0,0,0,0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header-section {
+      background: var(--primary-color);
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px var(--shadow-color);
+    }
+
+    .back-button {
+      background: #FF9800;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #E68A00;
+    }
+
+    .logo-header {
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    .logo-text {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin: 20px 0;
+      font-size: 2em;
+    }
+
+    .search-section {
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .search-section h3 {
+      color: var(--text-color);
+      margin-bottom: 10px;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    #table-overview-container {
+      flex-grow: 1; /* Permite que el contenedor de mesas ocupe el espacio restante */
+      height: 80vh; /* 80% de la altura de la vista */
+      overflow-y: auto; /* Habilita el scroll vertical */
+      padding: 20px;
+      display: flex; /* Usar flexbox para centrar y manejar el flujo */
+      justify-content: center; /* Centrar horizontalmente el contenido */
+      align-items: flex-start; /* Alinear arriba el contenido */
+    }
+
+    #table-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      max-width: 1200px; /* Limita el ancho para pantallas grandes */
+      width: 100%; /* Asegura que ocupe el ancho disponible dentro del contenedor */
+    }
+
+    .table-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px var(--shadow-color);
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 120px; /* Altura fija para las tarjetas */
+    }
+
+    .table-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px var(--shadow-color);
+    }
+
+    .table-id {
+      font-size: 2.2em;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+
+    .table-waiter {
+      font-size: 1em;
+      color: #666;
+    }
+
+    /* Estilos para el detalle de la mesa - Manteniendo el estilo existente si es necesario */
+    #table-detail {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px var(--shadow-color);
+      padding: 20px;
+      margin: 20px;
+      display: none; /* Oculto por defecto */
+    }
+
+    #table-detail h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+
+    .detail-label {
+      font-weight: bold;
+      color: #555;
+    }
+
+    .detail-value {
+      color: var(--text-color);
+    }
+
+    .order-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .order-items-table th,
+    .order-items-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .order-items-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .nav-btns {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .nav-btns button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex: 1; /* Para que los botones ocupen el mismo espacio */
+    }
+
+    .nav-btns button:hover {
+      opacity: 0.9;
+    }
+
+    .nav-btns button:nth-child(1) { background: #607D8B; } /* Volver */
+    .nav-btns button:nth-child(2) { background: var(--primary-color); } /* Inicio */
+    #emitirCuentaBtn { background: #F44336; }
+    #cerrarMesaBtn { background: #607D8B; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .header-section {
+        flex-direction: column;
+        padding: 10px;
+      }
+      .back-button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      .logo-header {
+        margin-top: 10px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+      #table-overview-container {
+        height: auto; /* Altura automática para evitar overflow en pantallas pequeñas */
+        flex-grow: 1;
+      }
+      #table-overview {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+      }
+      .table-card {
+        height: 100px;
+      }
+      .table-id {
+        font-size: 1.8em;
+      }
+      .table-waiter {
+        font-size: 0.9em;
+      }
+      .nav-btns {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="header-section">
     <button class="back-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
     <div class="logo-header">
-      <div class="logo-text">FASTER CONSULTORES</div>
+      <div class="logo-text">Mesas Abiertas</div>
     </div>
   </div>
+  <div class="search-section">
+    <h3>Buscar mesa</h3>
+    <input type="number" id="mesaSearchInput" class="search-input" placeholder="Ej: 5, 12, etc.">
+  </div>
 
-  <h1>🍽️ Mesas del Restaurante</h1>
-  <div id="table-overview"></div>
+  <div id="table-overview-container">
+    <div id="table-overview"></div>
+  </div>
+  
   <div id="table-detail"></div>
+
   <script>
     let tables = [];
+    const overviewContainer = document.getElementById('table-overview-container');
     const overviewDiv = document.getElementById('table-overview');
     const detailDiv = document.getElementById('table-detail');
+    const mesaSearchInput = document.getElementById('mesaSearchInput');
 
     function fetchMesasAbiertas() {
       fetch(`${BACKEND_BASE_URL}/mesas`)
         .then(res => res.json())
         .then(data => {
           tables = Object.values(data);
-          renderOverview();
+          tables.sort((a, b) => parseInt(a.mesa) - parseInt(b.mesa)); // Ordenar por número de mesa
+          renderOverview(tables); // Renderizar todas las mesas al inicio
         })
         .catch(() => {
-          overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto;">No se pudo conectar al servidor.</div>';
+          overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto; text-align: center;">No se pudo conectar al servidor.</div>';
         });
     }
 
-    function renderOverview() {
+    function renderOverview(filteredTables) {
       detailDiv.style.display = 'none';
-      overviewDiv.style.display = 'grid';
-      overviewDiv.innerHTML = '';
-      if (tables.length === 0) {
-        overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto;">No hay mesas abiertas actualmente.</div>';
+      overviewContainer.style.display = 'flex'; // Asegura que el contenedor flex se muestre
+      overviewDiv.innerHTML = ''; // Limpiar antes de renderizar
+      
+      if (filteredTables.length === 0) {
+        overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto; text-align: center;">No hay mesas abiertas actualmente.</div>';
         return;
       }
-      tables.forEach(table => {
+
+      filteredTables.forEach(table => {
         const card = document.createElement('div');
         card.className = 'table-card';
-        card.setAttribute('data-status', 'open');
+        card.setAttribute('data-status', 'open'); // Mantener para futuros estados si es necesario
         card.onclick = () => showDetail(table.mesa);
         card.innerHTML = `
           <div class="table-id">Mesa ${table.mesa}</div>
-          <div class="table-status">Abierta</div>
-          <div class="table-occupancy">${table.personas} ${parseInt(table.personas) === 1 ? 'persona' : 'personas'}</div>
           <div class="table-waiter">Garzón: ${table.garzon}</div>
-          <div class="table-time">Hora: ${table.hora || ''}</div>
         `;
         overviewDiv.appendChild(card);
       });
@@ -62,75 +322,78 @@
     function showDetail(mesaId) {
       const table = tables.find(t => t.mesa == mesaId);
       if (!table) return;
-      overviewDiv.style.display = 'none';
+
+      overviewContainer.style.display = 'none'; // Ocultar el contenedor de la vista general
       detailDiv.style.display = 'block';
-      // Calcular total
+
       const total = (table.productos || []).reduce((sum, item) => sum + (parseFloat(item.precio) * (item.cantidad || 1)), 0);
-      // Estado de cuenta emitida
-      const cuentaEmitida = table.cuenta_emitida;
+      const cuentaEmitida = table.cuenta_emitida; // Mantener por si se usa en el futuro
+
       detailDiv.innerHTML = `
-        <h2>Mesa ${table.mesa} - <span id="estadoMesa">${cuentaEmitida ? 'Cuenta solicitada' : 'Abierta'}</span></h2>
+        <h2>Mesa ${table.mesa}</h2>
         <div><span class="detail-label">Garzón:</span> <span class="detail-value">${table.garzon}</span></div>
         <div><span class="detail-label">Ocupantes:</span> <span class="detail-value">${table.personas}</span></div>
-        <div><span class="detail-label">Hora de apertura:</span> <span class="detail-value">${table.hora || ''}</span></div>
+        <div><span class="detail-label">Hora de apertura:</span> <span class="detail-value">${table.horaApertura || ''}</span></div>
         <div style="margin: 16px 0 8px 0;"><span class="detail-label">Consumo:</span></div>
         ${table.productos && table.productos.length > 0 ? `
         <table class="order-items-table">
           <thead>
-            <tr><th>Código</th><th>Producto</th><th>Precio</th><th>Cantidad</th></tr>
+            <tr><th>Cantidad</th><th>Producto</th><th>Precio</th></tr>
           </thead>
           <tbody>
             ${table.productos.map(item => `
               <tr>
-                <td>${item.codigo}</td>
+                <td>${item.cantidad}</td>
                 <td>${item.nombre}</td>
                 <td>$${item.precio}</td>
-                <td>${item.cantidad}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
-        ` : '<div style="color:#888;">Sin productos en la comanda.</div>'}
-        <div style="margin-top:10px;"><span class="detail-label">Total:</span> <span class="detail-value" id="totalMesa">$${total}</span></div>
+        ` : '<div style="color:#888; text-align: center;">Sin productos en la comanda.</div>'}
+        <div style="margin-top:10px; text-align: right;"><span class="detail-label">Total:</span> <span class="detail-value" id="totalMesa">$${total}</span></div>
         <div class="nav-btns">
           <button onclick="window.fetchMesasAbiertas()">Volver</button>
           <button onclick="window.goHome()">Inicio</button>
-          <button id="emitirCuentaBtn" style="background:#F44336;" ${cuentaEmitida ? 'disabled' : ''}>EMITE CUENTA</button>
-          <button id="cerrarMesaBtn" style="background:#607D8B;">Cerrar Mesa</button>
+          <button id="emitirCuentaBtn">EMITIR CUENTA</button>
+          <button id="cerrarMesaBtn">Cerrar Mesa</button>
         </div>
-        <div id="msgCuenta" style="margin-top:10px;color:#4CAF50;"></div>
+        <div id="msgCuenta" style="margin-top:10px;color:#4CAF50; text-align: center;"></div>
       `;
-      // Cambiar color de estado si cuenta emitida
-      if (cuentaEmitida) {
-        document.getElementById('estadoMesa').style.color = '#F44336';
-      }
-      // Lógica del botón EMITE CUENTA
+
+      // Lógica del botón EMITE CUENTA (adaptada)
       const btnEmitir = document.getElementById('emitirCuentaBtn');
-      if (btnEmitir && !cuentaEmitida) {
+      if (btnEmitir) {
+        // Deshabilitar si la cuenta ya fue emitida
+        if (cuentaEmitida) {
+          btnEmitir.disabled = true;
+          btnEmitir.textContent = 'Cuenta Solicitada';
+          btnEmitir.style.background = '#ccc';
+        }
+
         btnEmitir.onclick = function() {
           btnEmitir.disabled = true;
           btnEmitir.textContent = 'Enviando...';
           fetch(`${BACKEND_BASE_URL}/emitir-cuenta`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mesa: table.mesa, garzon: table.garzon, total })
+            body: JSON.stringify({ mesa: table.mesa, garzon: table.garzon, personas: table.personas, horaApertura: table.horaApertura })
           })
           .then(res => res.json())
           .then(resp => {
             document.getElementById('msgCuenta').textContent = resp.ok ? 'Cuenta emitida y enviada correctamente.' : 'Error al emitir cuenta.';
-            document.getElementById('estadoMesa').textContent = 'Cuenta solicitada';
-            document.getElementById('estadoMesa').style.color = '#F44336';
             btnEmitir.textContent = 'Cuenta Emitida';
             btnEmitir.disabled = true;
-            // No eliminamos la mesa aquí, solo marcamos cuenta emitida
+            btnEmitir.style.background = '#ccc';
           })
           .catch(() => {
             document.getElementById('msgCuenta').textContent = 'Error al emitir cuenta.';
-            btnEmitir.textContent = 'EMITE CUENTA';
+            btnEmitir.textContent = 'EMITIR CUENTA';
             btnEmitir.disabled = false;
           });
         };
       }
+
       // Lógica del botón Cerrar Mesa
       const btnCerrar = document.getElementById('cerrarMesaBtn');
       if (btnCerrar) {
@@ -156,6 +419,17 @@
         };
       }
     }
+
+    // Funcionalidad de búsqueda
+    mesaSearchInput.addEventListener('input', () => {
+      const searchTerm = mesaSearchInput.value.trim();
+      if (searchTerm === '') {
+        renderOverview(tables); // Si el buscador está vacío, mostrar todas las mesas
+      } else {
+        const filtered = tables.filter(table => String(table.mesa).includes(searchTerm));
+        renderOverview(filtered); // Mostrar solo las mesas que coinciden con la búsqueda
+      }
+    });
 
     window.fetchMesasAbiertas = fetchMesasAbiertas;
     window.showDetail = showDetail;

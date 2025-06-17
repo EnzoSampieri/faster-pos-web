@@ -1,0 +1,52 @@
+{
+  "store": {
+    "externalId": "1546626"
+  },
+  "couponDiscount": 5017.25,
+  "amountToPay": 15052,
+  "deliveryFee": 0,
+  "amount": 15052,
+  "isScheduled": false,
+  "websiteId": "63ebadc353f9eb8978f057a0",
+  "code": 3115,
+  "createdAt": "2025-06-12T15:55:20-04:00",
+  "items": [
+    {
+      "product": {
+        "name": "Coca Cola de 955 ml"
+      },
+      "comment": "",
+      "amount": 3,
+      "unitPrice": 955.6666666666666,
+      "baseUnitPrice": 955.6666666666666,
+      "productPrice": 2867,
+      "productBasePrice": 2867,
+      "modifiers": []
+    },
+    {
+      "product": {
+        "externalId": "23232323",
+        "name": "Hamburguesa Oklahoma"
+      },
+      "comment": "",
+      "amount": 3,
+      "unitPrice": 955.6666666666666,
+      "baseUnitPrice": 955.6666666666666,
+      "productPrice": 2867,
+      "productBasePrice": 2867,
+      "modifiers": []
+    },
+    {
+      "product": {
+        "name": "Fudge brownie de cacao"
+      },
+      "comment": "",
+      "amount": 1,
+      "unitPrice": 2867,
+      "baseUnitPrice": 2867,
+      "productPrice": 2867,
+      "productBasePrice": 2867,
+      "modifiers":[]
+    }
+  ]
+}

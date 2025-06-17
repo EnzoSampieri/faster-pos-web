@@ -1,0 +1,125 @@
+{
+  "33": {
+    "mesa": "33",
+    "garzon": "2",
+    "personas": "3",
+    "horaApertura": null,
+    "productos": [
+      {
+        "codigo": 525,
+        "nombre": "CEVICHE OSTION",
+        "precio": 6990,
+        "familia": "ALIMENTOS",
+        "subfamilia": "TABLAS",
+        "cantidad": 1,
+        "message": ""
+      },
+      {
+        "codigo": 659,
+        "nombre": "PAPAS BLUEMOON KG",
+        "precio": 12000,
+        "familia": "ALIMENTOS",
+        "subfamilia": "PAPAS FRITAS",
+        "cantidad": 2,
+        "message": ""
+      },
+      {
+        "codigo": 653,
+        "nombre": "PAPAS BRAVAS KG",
+        "precio": 10990,
+        "familia": "ALIMENTOS",
+        "subfamilia": "PAPAS FRITAS",
+        "cantidad": 2,
+        "message": ""
+      },
+      {
+        "codigo": 523,
+        "nombre": "CEVICHE CAMARON",
+        "precio": 6990,
+        "familia": "ALIMENTOS",
+        "subfamilia": "TABLAS",
+        "cantidad": 1,
+        "message": ""
+      },
+      {
+        "codigo": 701,
+        "nombre": "PAPAS BASTON 650GR",
+        "precio": 8500,
+        "familia": "ALIMENTOS",
+        "subfamilia": "PAPAS KIDS",
+        "cantidad": 1,
+        "message": ""
+      }
+    ]
+  },
+  "34": {
+    "mesa": "34",
+    "garzon": "2",
+    "personas": "2",
+    "horaApertura": null,
+    "productos": [
+      {
+        "codigo": 701,
+        "nombre": "PAPAS BASTON 650GR",
+        "precio": 8500,
+        "familia": "ALIMENTOS",
+        "subfamilia": "PAPAS KIDS",
+        "cantidad": 1,
+        "message": ""
+      },
+      {
+        "codigo": 653,
+        "nombre": "PAPAS BRAVAS KG",
+        "precio": 10990,
+        "familia": "ALIMENTOS",
+        "subfamilia": "PAPAS FRITAS",
+        "cantidad": 1,
+        "message": ""
+      }
+    ]
+  },
+  "36": {
+    "mesa": "36",
+    "garzon": "2",
+    "personas": "2",
+    "horaApertura": null,
+    "productos": [
+      {
+        "codigo": 523,
+        "nombre": "CEVICHE CAMARON",
+        "precio": 6990,
+        "familia": "ALIMENTOS",
+        "subfamilia": "TABLAS",
+        "cantidad": 1,
+        "message": ""
+      },
+      {
+        "codigo": 659,
+        "nombre": "PAPAS BLUEMOON KG",
+        "precio": 12000,
+        "familia": "ALIMENTOS",
+        "subfamilia": "PAPAS FRITAS",
+        "cantidad": 1,
+        "message": ""
+      },
+      {
+        "codigo": 5211,
+        "nombre": "ALTO HIGH HH",
+        "precio": 6000,
+        "familia": "COCTELES",
+        "subfamilia": "PISCOS HH",
+        "cantidad": 1,
+        "message": ""
+      },
+      {
+        "codigo": 4833,
+        "nombre": "APEROL HH",
+        "precio": 8000,
+        "familia": "COCTELES",
+        "subfamilia": "CLASICOS HH",
+        "cantidad": 1,
+        "message": ""
+      }
+    ]
+  }
+}

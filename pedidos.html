@@ -3,384 +3,1544 @@
 <head>
   <meta charset="UTF-8">
   <title>Comanda Touch</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="config.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --primary-color: #2196F3;
+      --secondary-color: #4CAF50;
+      --background-color: #f5f5f5;
+      --text-color: #333;
+      --border-color: #ddd;
+      --button-height: 48px;
+      --header-height: 60px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      height: 100vh;
+      overflow: hidden; /* Evita el scroll general de la página */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      height: var(--header-height);
+      background: var(--primary-color);
+      color: white;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      flex-shrink: 0; /* Asegura que no se encoja */
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: default;
+      padding: 8px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .order-section {
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: 16px;
+      transition: flex-basis 0.3s, padding-bottom 0.3s;
+      flex: 1 1 60vh;
+      min-height: 40vh;
+      max-height: 60vh;
+      box-sizing: border-box;
+      margin-top:40px;
+    }
+
+
+    .order-section.revision {
+      flex-basis: 60vh;
+      min-height: 40vh;
+      max-height: 70vh;
+      padding-bottom: 0 !important;
+    }
+
+    .order-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .order-table th,
+    .order-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .order-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .product-section {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      position: relative;
+      flex: 0 0 auto;
+      min-height: 0;
+      max-height: 35vh;
+      overflow: visible;
+      justify-content: flex-start;
+      margin-top: 0 !important;
+    }
+
+    .familias {
+      transition: opacity 0.2s, max-height 0.2s;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      padding: 8px 15px 8px 15px;
+      margin-top: 0 !important;
+      margin-bottom: 0;
+      background: #f8f9fa;
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 35vh;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .familias button {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px 10px;
+      font-size: 0.9em;
+      font-weight: bold;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-align: center;
+      min-height: 80px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .familias button:hover {
+      background-color: #f0f0f0;
+      border-color: var(--primary-color);
+    }
+
+    .familias button:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .familias button i {
+      font-size: 1.5em;
+      margin-bottom: 5px;
+    }
+
+    /* Nuevo: Estilos para los botones de Acceso Rápido */
+    .quick-access-subfamilies .quick-access-button {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px 10px;
+      font-size: 0.9em;
+      font-weight: bold;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-align: center;
+      min-height: 80px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .quick-access-subfamilies .quick-access-button:hover {
+      background-color: #f0f0f0;
+      border-color: var(--primary-color);
+    }
+
+    /* Nuevo: Estilos para el panel deslizante de productos */
+    .productos {
+      position: fixed; /* Posición fija para que se deslice desde abajo */
+      bottom: 20vh; /* Se abre un 20% más arriba desde el borde inferior */
+      left: 0;
+      right: 0;
+      max-height: 60vh; /* Altura máxima para el scroll */
+      transform: translateY(100%); /* Inicialmente oculto fuera de la pantalla */
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out, visibility 0.3s ease-out; /* Animación de deslizamiento, opacidad y visibilidad */
+      z-index: 100000; /* Aumentado drásticamente el z-index para asegurar que siempre esté por encima */
+      background: white;
+      display: none; /* Por defecto no ocupa espacio en el layout */
+      flex-direction: column;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+      opacity: 0; /* Oculto por defecto */
+      pointer-events: none; /* No interactuable por defecto */
+      visibility: hidden; /* Oculto por defecto */
+    }
+
+    .productos.active {
+      transform: translateY(0); /* Visible en la posición deseada */
+      opacity: 1; /* Visible cuando está activo */
+      pointer-events: auto; /* Interactuable cuando está activo */
+      visibility: visible; /* Visible cuando está activo */
+    }
+
+    .products-header {
+      padding: 15px;
+      background-color: white;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0; /* Evita que el encabezado se encoja */
+      display: flex;
+      justify-content: flex-end; /* Alinea el botón a la derecha */
+    }
+
+    .close-products-button {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .close-products-button:hover {
+      background-color: #1976D2;
+    }
+
+    .products-grid-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      transition: padding-bottom 0.3s;
+    }
+
+    .products-grid-container .product-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 120px;
+    }
+
+    .products-grid-container .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .products-grid-container .product-name {
+      font-weight: 600;
+      font-size: 1.1em;
+      color: var(--text-color);
+    }
+
+    .products-grid-container .product-price {
+      color: var(--primary-color);
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 5px;
+    }
+
+    .products-grid-container .product-card.associated {
+      background-color: #e3f2fd;
+      border-color: var(--primary-color);
+    }
+
+    /* Asegura que el contenedor principal de botones tenga espacio para los flotantes */
+    .action-buttons {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      left: 16px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      gap: 8px;
+      z-index: 90000;
+      flex-shrink: 0;
+      background: transparent;
+    }
+
+    .action-button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 24px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      flex: 1;
+    }
+
+    .send-button {
+      background: var(--secondary-color);
+    }
+
+    .update-button {
+      background: var(--primary-color);
+    }
+
+    .add-more-button {
+      background: var(--primary-color);
+    }
+
+    .action-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quantity-button {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 4px;
+      background: var(--primary-color);
+      color: white;
+      cursor: pointer;
+    }
+
+    .remove-button {
+      color: #dc3545;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* Estilos del Modal de Mensaje */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .modal-overlay.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 400px;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease-out;
+    }
+
+    .modal-overlay.visible .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .modal-content textarea {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1em;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .modal-buttons .save-button {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .modal-buttons .save-button:hover {
+      background-color: #388E3C;
+    }
+
+    .modal-buttons .cancel-button {
+      background-color: #ccc;
+      color: var(--text-color);
+    }
+
+    .modal-buttons .cancel-button:hover {
+      background-color: #bbb;
+    }
+
+    /* Estilos para los modificadores */
+    .modificador-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modificador-option {
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1em;
+      text-align: left;
+    }
+
+    .modificador-option:hover {
+      background-color: #f0f0f0;
+      border-color: var(--primary-color);
+    }
+
+    .modificador-option:active {
+      transform: translateY(1px);
+      background-color: #e0e0e0;
+    }
+
+    .modificador-option.selected {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Agregar estilos CSS para los productos agregados */
+    .producto-agregado {
+      background-color: #f8f9fa;
+    }
+    .producto-agregado td:first-child {
+      padding-left: 2em;
+    }
+    .producto-principal {
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .oculto {
+      opacity: 0 !important;
+      max-height: 0 !important;
+      pointer-events: none !important;
+      overflow: hidden !important;
+    }
+
+    .familias.con-botones-flotantes,
+    .products-grid-container.con-botones-flotantes {
+      padding-bottom: 110px !important;
+    }
+  </style>
 </head>
 <body>
-  <div class="header-section">
-    <button class="back-button" onclick="window.history.back()">Volver</button>
+  <div class="header">
+    <div class="header-info">
+      <button class="back-button" onclick="window.history.pushState(null, null, window.location.href);">←</button>
+      <span id="mesaGarzonInfo">Mesa - Garzón</span>
+    </div>
+    <div class="header-title">Comanda</div>
   </div>
 
-  <div class="main-content">
-    <h2>Mesa <span id="mesaNum"></span> | Garzón: <span id="garzonNom"></span> | Personas: <span id="personasNum"></span></h2>
+  <div class="main-container">
+    <section class="order-section" id="orderSection">
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="comandaBody"></tbody>
+      </table>
+    </section>
 
-    <h3>👨‍🍳 Familias</h3>
-    <div class="familias panel-grid" id="familias"></div>
+    <section class="product-section" id="productSection">
+      <div class="familias" id="familias"></div> <!-- Aquí se mostrarán familias y accesos rápidos juntos -->
 
-    <h3>📦 Subfamilias</h3>
-    <div class="subfamilias panel-grid" id="subfamilias"></div>
+      <!-- Nuevo: Panel deslizante de productos -->
+      <div class="productos" id="productos">
+        <div class="products-header">
+          <button class="close-products-button" onclick="hideProductPanel()">Cerrar productos</button>
+        </div>
+        <div class="products-grid-container" id="productsGridContainer">
+          <!-- Los productos se cargarán aquí -->
+        </div>
+      </div>
+    </section>
+  </div>
 
-    <h3>🍽️ Productos</h3>
-    <div class="productos panel-grid" id="productos"></div>
-    <button id="verMasBtn" class="btn-blue hidden">Ver más productos</button>
+  <div class="action-buttons">
+    <button class="action-button update-button" onclick="revisarComanda()">REVISAR COMANDA</button>
+    <button class="action-button add-more-button" onclick="agregarMasProductos()" id="addMoreButton" style="display: none;">AGREGAR MÁS PRODUCTOS</button>
+    <button class="action-button send-button" onclick="enviarComanda()" id="sendButton" disabled>ENVIAR COMANDA</button>
+  </div>
 
-    <table class="comanda-table">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Producto</th>
-          <th>Precio</th>
-          <th>Cantidad</th>
-          <th>Eliminar</th>
-        </tr>
-      </thead>
-      <tbody id="comandaBody"></tbody>
-    </table>
-
-    <div class="action-buttons">
-      <button class="btn-green" onclick="exportarCSV()">Enviar Mesa</button>
-      <button class="btn-blue" onclick="descargarProductos()">Actualizar Productos</button>
+  <!-- Modal para Mensajes de Producto -->
+  <div class="modal-overlay" id="messageModal">
+    <div class="modal-content">
+      <h3 id="modalProductName">Agregar Mensaje</h3>
+      <div id="modificadoresContainer" style="display:none;"></div>
+      <textarea id="productMessageInput" placeholder="Escribe un mensaje para este producto..."></textarea>
+      <div class="modal-buttons">
+        <button class="save-button" onclick="guardarMensajeProducto()">Guardar</button>
+        <button class="cancel-button" onclick="cerrarModalMensaje()">Cancelar</button>
+      </div>
     </div>
-
-    <div id="logEnvio"></div>
   </div>
 
   <script>
+    // Desactivar el botón de volver y controlar la navegación del historial
+    document.addEventListener('DOMContentLoaded', () => {
+      const backButton = document.querySelector('.back-button');
+      if (backButton) {
+        // Ocultar y deshabilitar el botón visualmente
+        backButton.style.opacity = '0';
+        backButton.style.pointerEvents = 'none';
+      }
+
+      // Asegurar que no se pueda retroceder en el historial del navegador
+      history.pushState(null, null, location.href); // Empujar un estado al cargar la página
+      window.onpopstate = function () {
+        history.go(1); // Forzar a ir un paso adelante, bloqueando el retroceso
+      };
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const mesa = urlParams.get('mesa') || '';
     const garzon = urlParams.get('garzon') || '';
     const personas = urlParams.get('personas') || '';
     const horaApertura = urlParams.get('horaApertura') || '';
 
-    document.getElementById("mesaNum").innerText = mesa;
-    document.getElementById("garzonNom").innerText = garzon;
-    document.getElementById("personasNum").innerText = personas;
+    document.getElementById("mesaGarzonInfo").innerText = `Mesa ${mesa} - Garzón: ${garzon}`;
 
-    let productos = [];
     let currentSessionProducts = [];
     let existingProductsFromBackend = [];
+    let currentProductIndexForMessage = -1;
+    let currentAgregadoIndexForMessage = undefined;
+    let currentActiveBlock = -1;
+    let isReviewMode = false; // Nueva variable para controlar el modo de revisión
 
-    let currentFamily = '';
-    let currentSubfamily = '';
-    let productsShownCount = 0;
-    let filteredProducts = [];
+    let currentFamily = null;
+    let allProducts = [];
+    let allModificadores = []; // Nueva variable para almacenar los modificadores
 
-    async function cargarProductos() {
-      const cachedData = localStorage.getItem('cachedProductsData');
-      if (cachedData) {
-        const { products: cachedProducts, lastModified: cachedLastModified } = JSON.parse(cachedData);
-        if (cachedProducts && cachedProducts.length > 0) {
-          productos = cachedProducts;
-          mostrarFamilias();
-          console.log('Productos cargados desde caché.');
-        }
-      }
+    // Referencias a los nuevos contenedores
+    const productosContainer = document.getElementById('productos');
+    const productsGridContainer = document.getElementById('productsGridContainer');
 
+    // Nuevo: Global variable to keep track of the current category level shown in the 'familias' div
+    let currentCategoryLevel = 'mainFamilies'; // Can be 'mainFamilies' or 'subfamilies'
+    let currentParentFamilyCode = null; // Stores the code of the main family whose subcategories are currently displayed
+
+    // Nueva Definición de Categorías con subcategorías y accesos rápidos
+    const familiasDefinidas = [
+      { codigo: '01', icono: '🍽️' }, // ALIMENTOS
+      { codigo: '03', icono: '🥤' }, // BEBIDAS
+      { codigo: '02', icono: '☕' }, // CAFETERÍA
+      { codigo: '04', icono: '🧀' }  // AGREGADOS
+    ];
+
+    const subfamiliasAccesoRapido = [
+      { codigo: '0401', icono: '➕'}, // ADICIONALES - Ejemplo de acceso rápido
+      { codigo: '0301', icono: '🍊' } // JUGOS - Otro ejemplo de acceso rápido
+      // Agrega aquí más subfamilias de acceso rápido según sea necesario
+    ];
+
+    // Nueva estructura de datos para almacenar nombres e iconos de familias/subfamilias dinámicamente
+    let categoryNameMap = {}; // { codigo: { nombre: '...', icono: '...', isFamilia: true/false } }
+
+    // Función para procesar allProducts y construir categoryNameMap
+    function buildCategoryNameMap() {
+        categoryNameMap = {}; // Reiniciar para reconstruir
+
+        allProducts.forEach(product => {
+            // Mapear familias
+            const familiaCode = product.codigo_familia;
+            const familiaName = product.nombre_familia;
+            if (familiaCode && familiaName && !categoryNameMap[familiaCode]) {
+                categoryNameMap[familiaCode] = { nombre: familiaName, icono: '📦', isFamilia: true };
+            }
+
+            // Mapear subfamilias
+            const subfamiliaCode = product.codigo_subfamilia;
+            const subfamiliaName = product.nombre_subfamilia;
+            if (subfamiliaCode && subfamiliaName && !categoryNameMap[subfamiliaCode]) {
+                categoryNameMap[subfamiliaCode] = { nombre: subfamiliaName, icono: '🏷️', isFamilia: false };
+            }
+        });
+
+        // Asignar íconos personalizados a las familias y subfamilias definidas manualmente
+        familiasDefinidas.forEach(f => {
+            if (categoryNameMap[f.codigo]) {
+                categoryNameMap[f.codigo].icono = f.icono || categoryNameMap[f.codigo].icono;
+            }
+        });
+        subfamiliasAccesoRapido.forEach(s => {
+            if (categoryNameMap[s.codigo]) {
+                categoryNameMap[s.codigo].icono = s.icono || categoryNameMap[s.codigo].icono;
+            }
+        });
+
+        console.log("Mapa de nombres de categorías construido:", categoryNameMap);
+    }
+
+    // Función para cargar los productos desde el backend
+    async function loadProducts() {
       try {
         const response = await fetch(`${BACKEND_BASE_URL}/productos`);
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Error al cargar productos del servidor');
+          throw new Error('Error al cargar la base de productos');
         }
-        const { products: latestProducts, lastModified: latestModifiedTime } = await response.json();
-
-        if (!cachedData || latestModifiedTime > JSON.parse(cachedData).lastModified) {
-          console.log('Base de productos actualizada, actualizando caché.');
-          productos = latestProducts;
-          localStorage.setItem('cachedProductsData', JSON.stringify({ products: latestProducts, lastModified: latestModifiedTime }));
-          mostrarFamilias();
-        } else {
-          console.log('Base de productos no ha cambiado, usando caché existente.');
-        }
-        cargarComandaExistente();
-      } catch (err) {
-        console.error('Fallo al cargar la base de productos desde el backend:', err.message);
-        if (!cachedData) {
-          alert('No se pudo cargar la base de productos: ' + err.message + '. Intente actualizar o contacte a soporte.');
-        }
-      }
-    }
-
-    async function descargarProductos() {
-      let logDiv = document.getElementById('logEnvio');
-      if (!logDiv) {
-        logDiv = document.createElement('div');
-        logDiv.id = 'logEnvio';
-        logDiv.style = 'margin-top:8px;font-size:0.95em;color:#888;';
-        document.querySelector('button[onclick="exportarCSV()"]')
-          .insertAdjacentElement('afterend', logDiv);
-      }
-      logDiv.textContent = 'Descargando productos... por favor espere.';
-
-      try {
-        const response = await fetch(`${BACKEND_BASE_URL}/descargar-productos`, { method: 'POST' });
         const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message || 'Error desconocido al descargar productos');
-        }
-        logDiv.textContent = data.message;
-        await cargarProductos();
-        setTimeout(() => logDiv.textContent = '', 3000);
-      } catch (err) {
-        logDiv.textContent = 'Error al descargar productos: ' + err.message;
-        console.error('Error en descargarProductos:', err);
+        // console.log("Datos raw de productos recibidos del backend:", data.products.slice(0, 5)); // DEBUG: Muestra los primeros 5 productos raw
+        allProducts = data.products.map(product => ({
+          ...product,
+          familia: product.codigo_familia ? String(product.codigo_familia).trim() : '',
+          subfamilia: product.codigo_subfamilia ? String(product.codigo_subfamilia).trim() : '',
+          producto_asociad: product.producto_asociad ? String(product.producto_asociad).trim() : '',
+          estado: product.estado ? String(product.estado).toLowerCase().trim() : 'n' // Asegurarse de que el estado esté en minúsculas y sea 'n' por defecto
+        })); // Asignar a la variable global y limpiar espacios
+        console.log("Productos cargados y limpiados (allProducts):"); // DEBUG
+        allProducts.slice(0, 5).forEach(p => console.log(`  Código: ${p.codigo}, Familia: '${p.familia}', Subfamilia: '${p.subfamilia}', Asociado: '${p.producto_asociad}', Estado: '${p.estado}'`)); // DEBUG: Muestra los primeros 5 productos con campos trimmeados
+        
+        buildCategoryNameMap(); // Construir categorías después de cargar productos
+        displayMainCategoriesAndQuickAccess(); // Renderizar categorías principales y accesos rápidos
+
+        // Asegurar que el panel de productos esté oculto al inicio
+        hideProductPanel();
+
+      } catch (error) {
+        console.error('Error en loadProducts:', error);
+        mostrarMensaje(`Error al cargar productos: ${error.message}`, 'error');
       }
     }
 
-    cargarProductos();
+    // Nueva: Función para mostrar las categorías principales y los accesos rápidos
+    function displayMainCategoriesAndQuickAccess() {
+        console.log("Renderizando categorías principales y accesos rápidos..."); // DEBUG
+        const familiasContainer = document.getElementById('familias');
+        familiasContainer.innerHTML = ''; // Limpiar contenedor para familias/subfamilias
 
-    function cargarComandaExistente() {
-      if (!mesa) return;
-      fetch(`${BACKEND_BASE_URL}/mesas/${mesa}`)
-        .then(res => {
-          if (res.status === 404) return null;
-          if (!res.ok) throw new Error('Error al cargar mesa existente');
-          return res.json();
-        })
-        .then(data => {
-          if (data && data.productos) {
-            existingProductsFromBackend = data.productos;
-            existingProductsFromBackend.forEach(item => item.cantidad = parseInt(item.cantidad, 10));
-          }
-        })
-        .catch(err => {
-          console.error('Error al cargar la comanda existente:', err);
+        // Renderizar familias definidas manualmente
+        familiasDefinidas.sort((a, b) => {
+            const nameA = (categoryNameMap[a.codigo] ? categoryNameMap[a.codigo].nombre : '').toLowerCase();
+            const nameB = (categoryNameMap[b.codigo] ? categoryNameMap[b.codigo].nombre : '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        }).forEach(familiaDefinida => {
+            const familiaInfo = categoryNameMap[familiaDefinida.codigo];
+            if (familiaInfo) { // Solo si la familia existe en los productos cargados
+                const button = document.createElement('button');
+                button.className = 'family-button';
+                button.innerHTML = `${familiaInfo.icono || '📦'}<br>${familiaInfo.nombre}`;
+                button.onclick = () => showSubcategories(familiaDefinida.codigo);
+                familiasContainer.appendChild(button);
+                console.log(`Botón de familia añadido: ${familiaInfo.nombre} (${familiaDefinida.codigo})`); // DEBUG
+            } else {
+                console.warn(`Familia definida manualmente con código ${familiaDefinida.codigo} no encontrada en los productos cargados.`);
+            }
         });
+
+        // Renderizar subfamilias de acceso rápido definidas manualmente en la misma grilla
+        subfamiliasAccesoRapido.sort((a, b) => {
+            const nameA = (categoryNameMap[a.codigo] ? categoryNameMap[a.codigo].nombre : '').toLowerCase();
+            const nameB = (categoryNameMap[b.codigo] ? categoryNameMap[b.codigo].nombre : '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        }).forEach(subfamiliaAccesoRapidoDefinida => {
+            const subfamiliaInfo = categoryNameMap[subfamiliaAccesoRapidoDefinida.codigo];
+            if (subfamiliaInfo) { // Solo si la subfamilia existe en los productos cargados
+                const button = document.createElement('button');
+                button.className = 'family-button'; // Mismo estilo que las familias
+                button.innerHTML = `${subfamiliaInfo.icono || '✨'}<br>${subfamiliaInfo.nombre}`;
+                button.onclick = () => mostrarProductosPorSubfamilia(subfamiliaAccesoRapidoDefinida.codigo);
+                familiasContainer.appendChild(button);
+                console.log(`Botón de acceso rápido añadido: ${subfamiliaInfo.nombre} (${subfamiliaAccesoRapidoDefinida.codigo})`); // DEBUG
+            } else {
+                console.warn(`Subfamilia de acceso rápido definida manualmente con código ${subfamiliaAccesoRapidoDefinida.codigo} no encontrada en los productos cargados.`);
+            }
+        });
+
+        currentCategoryLevel = 'mainFamilies';
+        ajustarEspacioBotonera();
     }
 
-    function mostrarFamilias() {
-      const cont = document.getElementById("familias");
-      const subfamiliasCont = document.getElementById("subfamilias");
-      const productosCont = document.getElementById("productos");
-      const verMasBtn = document.getElementById("verMasBtn");
+    // Nueva: Función para mostrar las subcategorías de una familia seleccionada
+    function showSubcategories(parentCategoryCode) {
+        console.log("Mostrando subcategorías para la familia:", parentCategoryCode); // DEBUG
+        currentParentFamilyCode = parentCategoryCode; // Almacenar el código de la familia padre
+        const familiasContainer = document.getElementById('familias');
+        familiasContainer.innerHTML = ''; // Limpiar contenedor
 
-      cont.innerHTML = "";
-      subfamiliasCont.innerHTML = "";
-      productosCont.innerHTML = "";
-      verMasBtn.classList.add('hidden');
+        // Encontrar subcategorías que pertenecen a esta familia (del CSV)
+        const subcategoriasDeFamilia = {};
+        allProducts.forEach(product => {
+            if (product.codigo_familia === parentCategoryCode && product.codigo_subfamilia && product.nombre_subfamilia) {
+                if (!subcategoriasDeFamilia[product.codigo_subfamilia]) {
+                    subcategoriasDeFamilia[product.codigo_subfamilia] = {
+                        codigo: product.codigo_subfamilia,
+                        nombre: product.nombre_subfamilia,
+                        icono: '🏷️' // Icono por defecto
+                    };
+                    // Aplicar icono personalizado si está en categoryNameMap
+                    if (categoryNameMap[product.codigo_subfamilia]) {
+                        subcategoriasDeFamilia[product.codigo_subfamilia].icono = categoryNameMap[product.codigo_subfamilia].icono || '🏷️';
+                    }
+                }
+            }
+        });
 
-      const familias = [...new Set(productos.map(p => p.familia))];
-      familias.forEach(fam => {
-        const btn = document.createElement("button");
-        const spanText = document.createElement("span");
-        spanText.className = "button-text";
-        spanText.innerText = fam;
-        btn.appendChild(spanText);
-        btn.onclick = () => mostrarSubfamilias(fam);
-        cont.appendChild(btn);
-      });
+        if (Object.keys(subcategoriasDeFamilia).length > 0) {
+            // Convertir subcategorías a un array y ordenar por nombre
+            const sortedSubcategories = Object.values(subcategoriasDeFamilia).sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+            sortedSubcategories.forEach(sub => {
+                const button = document.createElement('button');
+                button.className = 'family-button'; // Usar el mismo estilo que las familias principales para consistencia
+                button.innerHTML = `${sub.icono || ''}<br>${sub.nombre}`;
+                button.onclick = () => mostrarProductosPorSubfamilia(sub.codigo);
+                familiasContainer.appendChild(button);
+                console.log(`Botón de subcategoría añadido: ${sub.nombre} (${sub.codigo})`); // DEBUG
+            });
+            currentCategoryLevel = 'subfamilies';
+        } else {
+            // Si la familia no tiene subcategorías en los productos cargados, mostrar directamente los productos de esa familia.
+            displayProductsForFamily(parentCategoryCode);
+            currentCategoryLevel = 'productsForFamily';
+        }
+        ajustarEspacioBotonera();
     }
 
-    function mostrarSubfamilias(familiaSeleccionada) {
-      const subfamiliasCont = document.getElementById("subfamilias");
-      const productosCont = document.getElementById("productos");
-      const verMasBtn = document.getElementById("verMasBtn");
+    // Función para mostrar productos de una familia específica (reutilizada para cuando no hay subfamilias)
+    function displayProductsForFamily(familyCode) {
+        console.log("Mostrando productos para la familia:", familyCode); // DEBUG
+        currentFamily = familyCode;
+        productsGridContainer.innerHTML = ''; // Limpiar solo el contenedor de la cuadrícula
 
-      subfamiliasCont.innerHTML = "";
-      productosCont.innerHTML = "";
-      verMasBtn.classList.add('hidden');
+        // Filtrar productos por la familia seleccionada y por estado
+        const productsOfFamily = allProducts.filter(p => {
+            const familia = p.codigo_familia ? String(p.codigo_familia).trim() : '';
+            const estado = p.estado ? String(p.estado).toLowerCase().trim() : 'n';
+            return familia === familyCode && estado !== 'd'; // No mostrar descontinuados
+        });
 
-      currentFamily = familiaSeleccionada;
-      currentSubfamily = '';
-      productsShownCount = 0;
+        console.log(`Productos encontrados para familia ${familyCode}:`, productsOfFamily.length); // DEBUG
 
-      const subfamilias = [...new Set(productos
-        .filter(p => p.familia === familiaSeleccionada)
-        .map(p => p.subfamilia)
-        .filter(sub => sub)
-      )];
+        if (productsOfFamily.length === 0) {
+            productsGridContainer.innerHTML = '<div style="text-align: center; padding: 20px;">No hay productos en esta familia.</div>';
+            showProductPanel(); // Mostrar el panel, incluso si está vacío
+            return;
+        }
 
-      subfamilias.sort().forEach(sub => {
-        const btn = document.createElement("button");
-        const spanText = document.createElement("span");
-        spanText.className = "button-text";
-        spanText.innerText = sub;
-        btn.appendChild(spanText);
-        btn.onclick = () => mostrarProductosPorSubfamilia(familiaSeleccionada, sub);
-        subfamiliasCont.appendChild(btn);
-      });
+        productsOfFamily.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            
+            const isBlocked = product.estado === 'x'; // Verificar si está bloqueado
 
-      if (subfamilias.length === 0) {
-        mostrarProductosPorSubfamilia(familiaSeleccionada, null);
-      }
+            if (product.producto_asociad) {
+                card.classList.add('associated');
+            }
+            if (isBlocked) {
+                card.style.opacity = '0.5'; // Hacerlo más opaco
+                card.style.pointerEvents = 'none'; // Deshabilitar clic
+            }
+
+            card.innerHTML = `
+                <div class="product-name">${product.nombre}</div>
+                <div class="product-price">$${parseFloat(product.precio).toLocaleString('es-CL')}</div>
+            `;
+
+            card.onclick = () => {
+                if (isBlocked) return; // No hacer nada si está bloqueado
+                agregarProducto(product);
+                if (product.producto_asociad) {
+                    setTimeout(() => {
+                        mostrarProductosPorSubfamilia(product.producto_asociad);
+                    }, 200);
+                } else {
+                    hideProductPanel();
+                    displayMainCategoriesAndQuickAccess();
+                }
+            };
+            productsGridContainer.appendChild(card);
+        });
+        showProductPanel(); // Mostrar el panel después de cargar los productos
+        ajustarEspacioBotonera();
     }
 
-    function mostrarProductosPorSubfamilia(familia, subfamilia, reiniciar = true) {
-      const cont = document.getElementById("productos");
-      const verMasBtn = document.getElementById("verMasBtn");
+    // Funciones de control de visibilidad del panel de productos
+    function showProductPanel() {
+      productosContainer.style.display = 'flex'; // Asegura que esté en display:flex antes de la transición de opacidad/transform
+      productosContainer.style.visibility = 'visible'; // Hacer visible antes de la transición de opacidad/transform
+      productosContainer.classList.add('active');
+      productosContainer.style.pointerEvents = 'auto'; // Hacer interactuable
+      // console.log("Panel de productos mostrado. Display:", productosContainer.style.display); // DEBUG
+    }
 
-      if (reiniciar) {
-        cont.innerHTML = "";
-        productsShownCount = 0;
-        currentSubfamily = subfamilia;
-        filteredProducts = productos.filter(p => p.familia === familia && (subfamilia === null || p.subfamilia === subfamilia));
-      }
+    function hideProductPanel() {
+      productosContainer.classList.remove('active');
+      productosContainer.style.pointerEvents = 'none'; // Deshabilitar interacción inmediatamente
+      // Retrasar el display: none y visibility: hidden para permitir que la transición finalice
+      setTimeout(() => {
+        productosContainer.style.display = 'none';
+        productosContainer.style.visibility = 'hidden';
+        // console.log("Panel de productos oculto después de transición. Display:", productosContainer.style.display); // DEBUG
+      }, 300); // 300ms debe coincidir con la duración de la transición en CSS
+      // console.log("Panel de productos oculto (transición iniciada)."); // DEBUG
+    }
 
-      const productsToShow = filteredProducts.slice(productsShownCount, productsShownCount + 8);
+    function actualizarComanda() {
+      const tbody = document.getElementById("comandaBody");
+      tbody.innerHTML = "";
+      
+      currentSessionProducts.forEach((item, index) => {
+        try {
+          // Crear fila para el producto principal
+          const tr = document.createElement("tr");
+          tr.className = "producto-principal";
+          tr.onclick = () => abrirModalMensaje(index);
+          
+          const tdProducto = document.createElement("td");
+          tdProducto.innerText = item.nombre;
+          if (item.observacion) {
+            const messageSpan = document.createElement("span");
+            messageSpan.className = "product-message-indicator";
+            messageSpan.innerText = ` (${item.observacion})`;
+            tdProducto.appendChild(messageSpan);
+            tdProducto.style.fontWeight = 'bold';
+          }
+          
+          const tdPrecio = document.createElement("td");
+          tdPrecio.innerText = `$${item.precio}`;
+          
+          const tdCantidad = document.createElement("td");
+          const cantidadDiv = document.createElement("div");
+          cantidadDiv.className = "quantity-control";
+          
+          const btnMenos = document.createElement("button");
+          btnMenos.className = "quantity-button";
+          btnMenos.innerText = "-";
+          btnMenos.onclick = (e) => { e.stopPropagation(); actualizarCantidad(index, -1); };
+          
+          const spanCantidad = document.createElement("span");
+          spanCantidad.innerText = item.cantidad;
+          
+          const btnMas = document.createElement("button");
+          btnMas.className = "quantity-button";
+          btnMas.innerText = "+";
+          btnMas.onclick = (e) => { e.stopPropagation(); actualizarCantidad(index, 1); };
+          
+          cantidadDiv.appendChild(btnMenos);
+          cantidadDiv.appendChild(spanCantidad);
+          cantidadDiv.appendChild(btnMas);
+          tdCantidad.appendChild(cantidadDiv);
+          
+          const tdEliminar = document.createElement("td");
+          const btnEliminar = document.createElement("button");
+          btnEliminar.className = "remove-button";
+          btnEliminar.innerText = "×";
+          btnEliminar.onclick = (e) => { e.stopPropagation(); eliminarProducto(index); };
+          tdEliminar.appendChild(btnEliminar);
+          
+          tr.appendChild(tdProducto);
+          tr.appendChild(tdPrecio);
+          tr.appendChild(tdCantidad);
+          tr.appendChild(tdEliminar);
+          
+          tbody.appendChild(tr);
 
-      productsToShow.forEach(p => {
-        const productCard = document.createElement("div");
-        productCard.className = "product-card";
-        productCard.innerHTML = `
-          <div class="product-name">${p.nombre}</div>
-          <div class="product-price">$${p.precio}</div>
-          <button class="add-product-btn" data-codigo="${p.codigo}" data-nombre="${p.nombre}" data-precio="${p.precio}">Agregar</button>
-        `;
-        productCard.querySelector('.add-product-btn').onclick = () => agregarProducto(p);
-        cont.appendChild(productCard);
+          // Agregar los productos agregados si existen
+          if (item.agregados && item.agregados.length > 0) {
+            item.agregados.forEach((agregado, agregadoIndex) => {
+              const trAgregado = document.createElement("tr");
+              trAgregado.className = "producto-agregado";
+              trAgregado.onclick = () => abrirModalMensajeAgregado(index, agregadoIndex);
+              
+              const tdAgregado = document.createElement("td");
+              tdAgregado.innerText = `Agr ${agregado.nombre}`;
+              if (agregado.observacion) {
+                const messageSpan = document.createElement("span");
+                messageSpan.className = "product-message-indicator";
+                messageSpan.innerText = ` (${agregado.observacion})`;
+                tdAgregado.appendChild(messageSpan);
+              }
+              
+              const tdPrecioAgregado = document.createElement("td");
+              tdPrecioAgregado.innerText = `$${agregado.precio}`;
+              
+              const tdCantidadAgregado = document.createElement("td");
+              const cantidadDivAgregado = document.createElement("div");
+              cantidadDivAgregado.className = "quantity-control";
+              
+              const btnMenosAgregado = document.createElement("button");
+              btnMenosAgregado.className = "quantity-button";
+              btnMenosAgregado.innerText = "-";
+              btnMenosAgregado.onclick = (e) => { e.stopPropagation(); actualizarCantidadAgregado(index, agregadoIndex, -1); };
+              
+              const spanCantidadAgregado = document.createElement("span");
+              spanCantidadAgregado.innerText = agregado.cantidad;
+              
+              const btnMasAgregado = document.createElement("button");
+              btnMasAgregado.className = "quantity-button";
+              btnMasAgregado.innerText = "+";
+              btnMasAgregado.onclick = (e) => { e.stopPropagation(); actualizarCantidadAgregado(index, agregadoIndex, 1); };
+              
+              cantidadDivAgregado.appendChild(btnMenosAgregado);
+              cantidadDivAgregado.appendChild(spanCantidadAgregado);
+              cantidadDivAgregado.appendChild(btnMasAgregado);
+              tdCantidadAgregado.appendChild(cantidadDivAgregado);
+              
+              const tdEliminarAgregado = document.createElement("td");
+              const btnEliminarAgregado = document.createElement("button");
+              btnEliminarAgregado.className = "remove-button";
+              btnEliminarAgregado.innerText = "×";
+              btnEliminarAgregado.onclick = (e) => { e.stopPropagation(); eliminarAgregado(index, agregadoIndex); };
+              tdEliminarAgregado.appendChild(btnEliminarAgregado);
+              
+              trAgregado.appendChild(tdAgregado);
+              trAgregado.appendChild(tdPrecioAgregado);
+              trAgregado.appendChild(tdCantidadAgregado);
+              trAgregado.appendChild(tdEliminarAgregado);
+              
+              tbody.appendChild(trAgregado);
+            });
+          }
+        } catch (e) {
+          console.error("Error al renderizar producto:", e);
+        }
       });
-
-      productsShownCount += productsToShow.length;
-
-      if (productsShownCount < filteredProducts.length) {
-        verMasBtn.classList.remove('hidden');
-        verMasBtn.onclick = () => mostrarProductosPorSubfamilia(currentFamily, currentSubfamily, false);
-      } else {
-        verMasBtn.classList.add('hidden');
-      }
     }
 
     function agregarProducto(prod) {
-      const existente = currentSessionProducts.find(p => p.codigo === prod.codigo);
-      if (existente) {
-        existente.cantidad += 1;
+      // Función para agregar el producto a la comanda
+      const agregarProductoAComanda = (modificadoresText) => {
+        // Si el producto tiene producto_asociad, es un producto principal
+        if (prod.producto_asociad) {
+          // Crear un nuevo bloque
+          currentSessionProducts.push({
+            ...prod,
+            cantidad: 1,
+            observacion: modificadoresText, // Guardar los modificadores como observación
+            modificadores: modificadoresText, // Mantener también en modificadores por compatibilidad
+            esPrincipal: true,
+            bloqueId: Date.now(), // Identificador único para el bloque
+            agregados: [] // Array para los productos agregados
+          });
+          currentActiveBlock = currentSessionProducts.length - 1;
+          actualizarComanda();
+          saveOrderCache();
+        } else {
+          // Es un producto agregado
+          if (currentActiveBlock === -1) {
+            // Si no hay bloque activo, crear uno nuevo
+            currentSessionProducts.push({
+              ...prod,
+              cantidad: 1,
+              observacion: '',
+              modificadores: '',
+              esPrincipal: true,
+              bloqueId: Date.now(),
+              agregados: []
+            });
+            currentActiveBlock = currentSessionProducts.length - 1;
+          }
+          
+          // Agregar el producto al bloque activo
+          currentSessionProducts[currentActiveBlock].agregados.push({
+            ...prod,
+            cantidad: 1,
+            observacion: '',
+            modificadores: ''
+          });
+          
+          actualizarComanda();
+          saveOrderCache();
+        }
+      };
+
+      // Solo mostrar modificadores si es un producto principal (tiene producto_asociad)
+      if (prod.producto_asociad) {
+        showModificadoresModal(prod, (modificadoresText) => {
+          // Primero agregar el producto con sus modificadores
+          agregarProductoAComanda(modificadoresText);
+          
+          // Después de agregar el producto, verificar si tiene subfamilia asociada
+          if (prod.producto_asociad) {
+            setTimeout(() => {
+              mostrarProductosPorSubfamilia(prod.producto_asociad);
+            }, 200);
+          } else {
+            hideProductPanel();
+            displayMainCategoriesAndQuickAccess();
+          }
+        });
       } else {
-        currentSessionProducts.push({ ...prod, cantidad: 1 });
+        // Si no es producto principal, agregar directamente sin modificadores
+        agregarProductoAComanda('');
+        // Después de agregar el producto, volver a mostrar los productos de la misma subfamilia
+        hideProductPanel();
+        mostrarProductosPorSubfamilia(prod.subfamilia);
       }
-      renderComanda();
+    }
+
+    // Función para mostrar productos por subfamilia
+    function mostrarProductosPorSubfamilia(codigo) {
+      console.log("Mostrando productos por subfamilia:", codigo); // DEBUG
+      productsGridContainer.innerHTML = ''; // Limpiar el contenedor
+
+      // Filtrar productos por la subfamilia seleccionada y por estado
+      const productosSubfamilia = allProducts.filter(p => {
+        const subfamilia = p.codigo_subfamilia ? String(p.codigo_subfamilia).trim() : '';
+        const estado = p.estado ? String(p.estado).toLowerCase().trim() : 'n';
+        return subfamilia === codigo && estado !== 'd'; // No mostrar descontinuados
+      });
+
+      console.log(`Productos encontrados para subfamilia '${codigo}':`, productosSubfamilia.length); // DEBUG
+
+      if (productosSubfamilia.length === 0) {
+        productsGridContainer.innerHTML = '<div style="text-align: center; padding: 20px;">No hay productos en esta subfamilia.</div>';
+        showProductPanel(); // Mostrar el panel, incluso si está vacío
+        return;
+      }
+
+      productosSubfamilia.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        
+        const isBlocked = product.estado === 'x'; // Verificar si está bloqueado
+
+        if (product.producto_asociad) {
+          card.classList.add('associated');
+        }
+        if (isBlocked) {
+          card.style.opacity = '0.5'; // Hacerlo más opaco
+          card.style.pointerEvents = 'none'; // Deshabilitar clic
+        }
+
+        card.innerHTML = `
+          <div class="product-name">${product.nombre}</div>
+          <div class="product-price">$${parseFloat(product.precio).toLocaleString('es-CL')}</div>
+        `;
+
+        card.onclick = () => {
+          if (isBlocked) return; // No hacer nada si está bloqueado
+          agregarProducto(product);
+        };
+        productsGridContainer.appendChild(card);
+      });
+      showProductPanel(); // Mostrar el panel con los productos de la subfamilia
+      ajustarEspacioBotonera();
+    }
+
+    function actualizarCantidad(index, delta) {
+      currentSessionProducts[index].cantidad += delta;
+      if (currentSessionProducts[index].cantidad <= 0) {
+        eliminarProducto(index);
+      } else {
+        actualizarComanda();
+      }
       saveOrderCache();
     }
 
     function eliminarProducto(index) {
       currentSessionProducts.splice(index, 1);
-      renderComanda();
+      actualizarComanda();
       saveOrderCache();
     }
 
-    function renderComanda() {
-      const tbody = document.getElementById("comandaBody");
-      tbody.innerHTML = "";
-      currentSessionProducts.forEach((item, i) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${item.codigo}</td>
-          <td>${item.nombre}</td>
-          <td>${item.precio}</td>
-          <td>${item.cantidad}</td>
-          <td><button onclick="eliminarProducto(${i})">X</button></td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    async function exportarCSV() {
-      if (!mesa) {
-        alert("Debe ingresar mesa.");
-        return;
-      }
-
-      let logDiv = document.getElementById('logEnvio');
-      if (!logDiv) {
-        logDiv = document.createElement('div');
-        logDiv.id = 'logEnvio';
-        logDiv.style = 'margin-top:8px;font-size:0.95em;color:#888;';
-        document.querySelector('button[onclick="exportarCSV()"]')
-          .insertAdjacentElement('afterend', logDiv);
-      }
-      logDiv.textContent = 'Enviando comanda...';
-
-      const mesaObj = {
-        mesa,
-        garzon,
-        personas,
-        productos: currentSessionProducts,
-        hora: new Date().toLocaleTimeString()
-      };
-
-      try {
-        // Paso 1: Guardar la mesa en el JSON (acumular productos)
-        const responseJson = await fetch(`${BACKEND_BASE_URL}/mesas`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(mesaObj)
-        });
-
-        if (!responseJson.ok) {
-          const errorData = await responseJson.json();
-          throw new Error(errorData.error || 'Error desconocido al guardar la mesa en el backend');
-        }
-
-        let txtMessage = 'Mesa guardada correctamente.';
-
-        // Paso 2: Enviar los productos de la sesión actual al archivo TXT si hay nuevos productos
-        if (currentSessionProducts.length > 0) {
-          const responseTxt = await fetch(`${BACKEND_BASE_URL}/enviar-comanda-productos`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              mesa,
-              garzon,
-              productos: currentSessionProducts
-            })
-          });
-
-          if (!responseTxt.ok) {
-            const errorData = await responseTxt.json();
-            throw new Error(errorData.error || 'Error desconocido al enviar la comanda TXT');
-          }
-          txtMessage += ' Comanda TXT enviada.';
-        } else {
-            txtMessage += ' No hay productos nuevos para enviar en comanda TXT.';
-        }
-
-        logDiv.textContent = txtMessage;
-        currentSessionProducts = [];
-        renderComanda();
-        clearOrderCache();
-
-        setTimeout(() => {
-          logDiv.textContent = '';
-          location.href = "inicio.html";
-        }, 1000);
-
-      } catch (err) {
-        logDiv.textContent = 'Error en el envío de comanda: ' + err.message;
-        console.error('Error en exportarCSV:', err);
-      }
-    }
-
     function saveOrderCache() {
-      if (mesa) {
-        localStorage.setItem(`pedido-mesa-${mesa}`, JSON.stringify(currentSessionProducts));
-        console.log(`Pedido para mesa ${mesa} guardado en caché.`);
-      }
+      localStorage.setItem(`comanda_${mesa}`, JSON.stringify(currentSessionProducts));
     }
 
     function clearOrderCache() {
-      if (mesa) {
-        localStorage.removeItem(`pedido-mesa-${mesa}`);
-        console.log(`Caché para mesa ${mesa} eliminada.`);
-      }
+      localStorage.removeItem(`comanda_${mesa}`);
     }
 
     function loadOrderCache() {
-      if (mesa) {
-        const cachedOrder = localStorage.getItem(`pedido-mesa-${mesa}`);
-        if (cachedOrder) {
-          try {
-            currentSessionProducts = JSON.parse(cachedOrder);
-            renderComanda();
-            console.log(`Pedido para mesa ${mesa} restaurado desde caché.`);
-          } catch (e) {
-            console.error("Error al parsear caché de pedido:", e);
-            clearOrderCache();
-          }
+      const cachedOrder = localStorage.getItem(`comanda_${mesa}`);
+      if (cachedOrder) {
+        try {
+          currentSessionProducts = JSON.parse(cachedOrder);
+          // Asegurarse de que los productos cargados tengan la propiedad 'observacion'
+          currentSessionProducts.forEach(item => {
+            if (typeof item.observacion === 'undefined') {
+              item.observacion = '';
+            }
+          });
+          actualizarComanda();
+          console.log(`Pedido para mesa ${mesa} restaurado desde caché.`);
+        } catch (e) {
+          console.error("Error al parsear caché de comanda:", e);
+          localStorage.removeItem(`comanda_${mesa}`); // Limpiar caché corrupto
         }
       }
     }
 
-    loadOrderCache();
+    function revisarComanda() {
+      isReviewMode = true;
+      hideProductPanel();
+      document.getElementById('productSection').style.display = 'none';
+      const orderSection = document.getElementById('orderSection');
+      orderSection.classList.add('revision');
+      document.querySelector('.update-button').style.display = 'none';
+      document.getElementById('sendButton').disabled = false;
+      document.getElementById('addMoreButton').style.display = 'block';
+      ajustarEspacioBotonera();
+    }
+
+    function agregarMasProductos() {
+      isReviewMode = false;
+      document.getElementById('productSection').style.display = 'flex';
+      const orderSection = document.getElementById('orderSection');
+      orderSection.classList.remove('revision');
+      document.querySelector('.update-button').style.display = 'block';
+      document.getElementById('sendButton').disabled = true;
+      document.getElementById('addMoreButton').style.display = 'none';
+      displayMainCategoriesAndQuickAccess();
+      ajustarEspacioBotonera();
+    }
+
+    async function enviarComanda() {
+      if (!isReviewMode) {
+        alert("Por favor, primero revise la comanda antes de enviar.");
+        return;
+      }
+
+      if (currentSessionProducts.length === 0) {
+        alert("La comanda está vacía.");
+        return;
+      }
+
+      try {
+        // Obtener valores de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const mesa = urlParams.get('mesa');
+        const garzon = urlParams.get('garzon');
+        const personas = urlParams.get('personas');
+        const horaApertura = urlParams.get('horaApertura');
+
+        // Obtener la hora actual para el nombre de archivo
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timestampedFileName = `m${mesa}${hours}${minutes}${seconds}.txt`;
+
+        // Construir el objeto de datos para guardar
+        const dataToSave = {
+          mesa: mesa,
+          garzon: garzon,
+          personas: personas,
+          horaApertura: horaApertura,
+          productos: currentSessionProducts,
+        };
+
+        // Guardar en mesas_abiertas.json
+        const saveResponse = await fetch(`${BACKEND_BASE_URL}/mesas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dataToSave),
+        });
+
+        if (!saveResponse.ok) {
+          const errorData = await saveResponse.json();
+          throw new Error(errorData.error || 'Error al guardar la mesa.');
+        }
+
+        // Construir el contenido del archivo TXT
+        let productsDetailContent = '';
+        currentSessionProducts.forEach((block, blockIndex) => {
+          // Agregar producto principal
+          const observacionPrincipal = block.observacion || '';
+          productsDetailContent += `${blockIndex + 1}\n${block.codigo}\n${observacionPrincipal}\n${block.cantidad}\n${parseFloat(block.precio).toFixed(2)}\n`;
+          
+          // Agregar productos agregados
+          if (block.agregados && block.agregados.length > 0) {
+            block.agregados.forEach((agregado, agregadoIndex) => {
+              const observacionAgregado = agregado.observacion || '';
+              productsDetailContent += `${blockIndex + 1}.${agregadoIndex + 1}\n${agregado.codigo}\n${observacionAgregado}\n${agregado.cantidad}\n${parseFloat(agregado.precio).toFixed(2)}\n`;
+            });
+          }
+        });
+
+        // Formatear la hora de apertura
+        let formattedHoraApertura = '000000';
+        if (horaApertura) {
+          const parts = String(horaApertura).split(':');
+          const h = parts[0] ? String(parts[0]).padStart(2, '0') : '00';
+          const m = parts[1] ? String(parts[1]).padStart(2, '0') : '00';
+          const s = parts[2] ? String(parts[2]).padStart(2, '0') : '00';
+          formattedHoraApertura = `${h}${m}${s}`;
+        } else {
+          const now = new Date();
+          const h = String(now.getHours()).padStart(2, '0');
+          const m = String(now.getMinutes()).padStart(2, '0');
+          const s = String(now.getSeconds()).padStart(2, '0');
+          formattedHoraApertura = `${h}${m}${s}`;
+        }
+
+        const content = `/header\n${mesa}\n${garzon}\n${personas}\n${formattedHoraApertura}\n/detalle\n${productsDetailContent}`;
+
+        // Enviar el archivo TXT
+        const transferResponse = await fetch(`${BACKEND_BASE_URL}/enviar-comanda-productos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mesa: mesa,
+            garzon: garzon,
+            productos: currentSessionProducts,
+            horaApertura: horaApertura,
+            timestampedFileName: timestampedFileName,
+            fileContent: content
+          }),
+        });
+
+        if (!transferResponse.ok) {
+          const errorData = await transferResponse.json();
+          throw new Error(errorData.error || 'Error al transferir la comanda.');
+        }
+
+        // Limpiar y redirigir
+        clearOrderCache();
+        window.location.href = "inicio.html";
+
+      } catch (err) {
+        console.error("Error al enviar comanda:", err);
+        alert("Error al enviar comanda: " + err.message);
+      }
+    }
+
+    // Funciones del Modal de Mensajes
+    function abrirModalMensaje(index) {
+      currentProductIndexForMessage = index;
+      currentAgregadoIndexForMessage = undefined;
+      const product = currentSessionProducts[index];
+      document.getElementById("modalProductName").innerText = `Mensaje para: ${product.nombre}`;
+      document.getElementById("productMessageInput").value = product.observacion || '';
+      // Mostrar solo el textarea y ocultar los modificadores rápidos
+      const modificadoresContainer = document.getElementById('modificadoresContainer');
+      if (modificadoresContainer) modificadoresContainer.style.display = 'none';
+      document.getElementById("productMessageInput").style.display = 'block';
+      document.getElementById("messageModal").classList.add("visible");
+      // Asegurar que los botones tengan el evento correcto
+      const modalButtons = document.querySelector('.modal-buttons');
+      const saveButton = modalButtons.querySelector('.save-button');
+      const cancelButton = modalButtons.querySelector('.cancel-button');
+      if (saveButton && cancelButton) {
+        saveButton.onclick = () => guardarMensajeProducto();
+        cancelButton.onclick = () => cerrarModalMensaje();
+      }
+    }
+
+    function guardarMensajeProducto() {
+      const message = document.getElementById("productMessageInput").value.trim();
+      if (currentProductIndexForMessage !== -1) {
+        if (typeof currentAgregadoIndexForMessage !== 'undefined') {
+          // Es un mensaje para un agregado
+          const agregado = currentSessionProducts[currentProductIndexForMessage].agregados[currentAgregadoIndexForMessage];
+          agregado.observacion = message; // Solo el mensaje personalizado
+        } else {
+          // Es un mensaje para un producto principal
+          const producto = currentSessionProducts[currentProductIndexForMessage];
+          producto.observacion = message; // Solo el mensaje personalizado
+        }
+        actualizarComanda();
+        saveOrderCache();
+      }
+      cerrarModalMensaje();
+    }
+
+    function cerrarModalMensaje() {
+      document.getElementById("messageModal").classList.remove("visible");
+      document.getElementById("productMessageInput").style.display = 'block';
+      document.getElementById("modalContent").style.display = 'block';
+      currentProductIndexForMessage = -1;
+      currentAgregadoIndexForMessage = undefined;
+    }
+
+    // Nuevas funciones para manejar agregados
+    function actualizarCantidadAgregado(blockIndex, agregadoIndex, delta) {
+      const agregado = currentSessionProducts[blockIndex].agregados[agregadoIndex];
+      agregado.cantidad += delta;
+      
+      if (agregado.cantidad <= 0) {
+        eliminarAgregado(blockIndex, agregadoIndex);
+      } else {
+        actualizarComanda();
+      }
+      saveOrderCache();
+    }
+
+    function eliminarAgregado(blockIndex, agregadoIndex) {
+      currentSessionProducts[blockIndex].agregados.splice(agregadoIndex, 1);
+      actualizarComanda();
+      saveOrderCache();
+    }
+
+    function abrirModalMensajeAgregado(blockIndex, agregadoIndex) {
+      currentProductIndexForMessage = blockIndex;
+      currentAgregadoIndexForMessage = agregadoIndex;
+      const agregado = currentSessionProducts[blockIndex].agregados[agregadoIndex];
+      document.getElementById("modalProductName").innerText = `Mensaje para: ${agregado.nombre}`;
+      document.getElementById("productMessageInput").value = agregado.observacion || '';
+      // Mostrar solo el textarea y ocultar los modificadores rápidos
+      const modificadoresContainer = document.getElementById('modificadoresContainer');
+      if (modificadoresContainer) modificadoresContainer.style.display = 'none';
+      document.getElementById("productMessageInput").style.display = 'block';
+      document.getElementById("messageModal").classList.add("visible");
+      // Asegurar que los botones tengan el evento correcto
+      const modalButtons = document.querySelector('.modal-buttons');
+      const saveButton = modalButtons.querySelector('.save-button');
+      const cancelButton = modalButtons.querySelector('.cancel-button');
+      if (saveButton && cancelButton) {
+        saveButton.onclick = () => guardarMensajeProducto();
+        cancelButton.onclick = () => cerrarModalMensaje();
+      }
+    }
+
+    // Función para cargar los modificadores desde el backend
+    async function loadModificadores() {
+      try {
+        const response = await fetch(`${BACKEND_BASE_URL}/modificadores`);
+        if (!response.ok) {
+          throw new Error('Error al cargar los modificadores');
+        }
+        allModificadores = await response.json();
+        console.log("Modificadores cargados:", allModificadores);
+      } catch (error) {
+        console.error('Error en loadModificadores:', error);
+        mostrarMensaje(`Error al cargar modificadores: ${error.message}`, 'error');
+      }
+    }
+
+    // Función para mostrar el modal de modificadores
+    function showModificadoresModal(product, onComplete) {
+      const modificadores = getModificadoresForProduct(product);
+      if (modificadores.length === 0) {
+        onComplete('');
+        return;
+      }
+
+      // OCULTAR el panel de productos antes de mostrar el modal de modificadores
+      hideProductPanel();
+
+      let currentModIndex = 0;
+      let selectedModificadores = [];
+      let selectedOption = null;
+
+      const modal = document.getElementById('messageModal');
+      const modalTitle = document.getElementById('modalProductName');
+      const modificadoresContainer = document.getElementById('modificadoresContainer');
+      const productMessageInput = document.getElementById('productMessageInput');
+      const modalButtons = document.querySelector('.modal-buttons');
+      const saveButton = modalButtons.querySelector('.save-button');
+      const cancelButton = modalButtons.querySelector('.cancel-button');
+
+      function showNextModificador() {
+        if (currentModIndex >= modificadores.length) {
+          modificadoresContainer.style.display = 'none';
+          productMessageInput.style.display = 'block';
+          modalTitle.innerText = 'Agregar Mensaje';
+          modal.classList.remove('visible');
+          onComplete(selectedModificadores.join(' - '));
+          return;
+        }
+
+        const mod = modificadores[currentModIndex];
+        productMessageInput.style.display = 'none';
+        modificadoresContainer.style.display = 'block';
+        modificadoresContainer.innerHTML = '';
+
+        modalTitle.innerText = mod.pregunta;
+
+        mod.opciones.forEach(opcion => {
+          const button = document.createElement('button');
+          button.className = 'modificador-option';
+          button.innerText = opcion;
+          button.onclick = () => {
+            const previousSelected = modificadoresContainer.querySelector('.selected');
+            if (previousSelected) previousSelected.classList.remove('selected');
+            button.classList.add('selected');
+            selectedOption = opcion;
+          };
+          modificadoresContainer.appendChild(button);
+        });
+
+        saveButton.onclick = () => {
+          if (selectedOption) {
+            selectedModificadores.push(selectedOption);
+            selectedOption = null;
+            currentModIndex++;
+            showNextModificador();
+          } else {
+            alert('Por favor, seleccione una opción');
+          }
+        };
+
+        cancelButton.onclick = () => {
+          modificadoresContainer.style.display = 'none';
+          productMessageInput.style.display = 'block';
+          modalTitle.innerText = 'Agregar Mensaje';
+          modal.classList.remove('visible');
+          onComplete(selectedModificadores.join(' - '));
+        };
+
+        modal.classList.add('visible');
+      }
+
+      // Inicializar modal
+      modificadoresContainer.style.display = 'block';
+      productMessageInput.style.display = 'none';
+      showNextModificador();
+    }
+
+    // Función para obtener los modificadores aplicables a un producto
+    function getModificadoresForProduct(product) {
+      const modificadores = [];
+      
+      // Modificadores por producto
+      const modProducto = allModificadores.find(m => m.tipo === 'producto' && m.codigo === product.codigo);
+      if (modProducto) {
+        console.log('Modificador encontrado por producto:', modProducto); // Debug
+        modificadores.push(modProducto);
+      }
+      
+      // Modificadores por subfamilia
+      const modSubfamilia = allModificadores.find(m => m.tipo === 'subfamilia' && m.codigo === product.subfamilia);
+      if (modSubfamilia) {
+        console.log('Modificador encontrado por subfamilia:', modSubfamilia); // Debug
+        modificadores.push(modSubfamilia);
+      }
+      
+      // Modificadores por familia
+      const modFamilia = allModificadores.find(m => m.tipo === 'familia' && m.codigo === product.familia);
+      if (modFamilia) {
+        console.log('Modificador encontrado por familia:', modFamilia); // Debug
+        modificadores.push(modFamilia);
+      }
+      
+      console.log('Total de modificadores encontrados:', modificadores.length); // Debug
+      return modificadores;
+    }
+
+    // Función para combinar modificadores con observación
+    function combineModificadoresAndObservacion(modificadores, observacion) {
+      if (!modificadores && !observacion) return '';
+      if (!modificadores) return observacion;
+      if (!observacion) return modificadores;
+      return `${modificadores} | ${observacion}`;
+    }
+
+    // Asegúrate de que el DOM esté completamente cargado antes de iniciar la carga de productos
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Promise.all([
+        loadProducts(), // Espera a que los productos se carguen
+        loadModificadores() // Cargar los modificadores
+      ]);
+      loadOrderCache(); // Carga la comanda existente (si hay) después de que todo esté listo
+    });
+
+    // --- JS para añadir la clase con-botones-flotantes cuando corresponda ---
+    function ajustarEspacioBotonera() {
+      const addMoreVisible = document.getElementById('addMoreButton').style.display !== 'none';
+      const sendVisible = !document.getElementById('sendButton').disabled;
+      const familias = document.getElementById('familias');
+      const productsGrid = document.getElementById('productsGridContainer');
+      if (addMoreVisible || sendVisible) {
+        familias.classList.add('con-botones-flotantes');
+        productsGrid.classList.add('con-botones-flotantes');
+      } else {
+        familias.classList.remove('con-botones-flotantes');
+        productsGrid.classList.remove('con-botones-flotantes');
+      }
+    }
   </script>
 </body>
 </html>
