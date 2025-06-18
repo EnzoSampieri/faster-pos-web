@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Mesas Abiertas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="/frontend/js/config.js"></script>
   <style>
     :root {
       --primary-color: #2196F3;
@@ -277,6 +277,13 @@
   <div id="table-detail"></div>
 
   <script>
+    // Create global config instance
+    const appConfig = new Config();
+
+    // Helper function for immediate use
+    function getBackendUrl() {
+      return appConfig.getBackendUrl();
+    }
     let tables = [];
     const overviewContainer = document.getElementById('table-overview-container');
     const overviewDiv = document.getElementById('table-overview');
@@ -284,7 +291,7 @@
     const mesaSearchInput = document.getElementById('mesaSearchInput');
 
     function fetchMesasAbiertas() {
-      fetch(`${BACKEND_BASE_URL}/mesas`)
+      fetch(`${getBackendUrl()}/mesas`)
         .then(res => res.json())
         .then(data => {
           tables = Object.values(data);
@@ -374,7 +381,7 @@
         btnEmitir.onclick = function() {
           btnEmitir.disabled = true;
           btnEmitir.textContent = 'Enviando...';
-          fetch(`${BACKEND_BASE_URL}/emitir-cuenta`, {
+          fetch(`${getBackendUrl()}/emitir-cuenta`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mesa: table.mesa, garzon: table.garzon, personas: table.personas, horaApertura: table.horaApertura })
@@ -399,7 +406,7 @@
       if (btnCerrar) {
         btnCerrar.onclick = function() {
           if (confirm(`¿Estás seguro de cerrar la Mesa ${table.mesa}? Esta acción la eliminará del sistema.`)) {
-            fetch(`${BACKEND_BASE_URL}/mesas/${table.mesa}`, {
+            fetch(`${getBackendUrl()}/mesas/${table.mesa}`, {
               method: 'DELETE'
             })
             .then(res => {

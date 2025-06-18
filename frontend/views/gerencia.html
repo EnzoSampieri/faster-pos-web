@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Panel de Administración</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="/frontend/js/config.js"></script>
   <link rel="stylesheet" href="/frontend/css/style.css">
   <style>
     body {
@@ -291,6 +291,13 @@
   </div>
 
   <script>
+    // Create global config instance
+    const appConfig = new Config();
+
+    // Helper function for immediate use
+    function getBackendUrl() {
+      return appConfig.getBackendUrl();
+    }
     // 1. Verificación de Autenticación
     if (sessionStorage.getItem('adminAuthenticated') !== 'true') {
       window.location.href = 'inicio.html';
@@ -329,7 +336,7 @@
       hideMessage(detailActionMessage);
       hideMessage(detailProductsMessage);
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
+        const response = await fetch(`${getBackendUrl()}/mesas`);
         if (!response.ok) {
           throw new Error('Error al cargar las mesas abiertas.');
         }
@@ -429,7 +436,7 @@
       const deletedProduct = updatedProducts.splice(productIndex, 1)[0]; // Eliminar y obtener el producto borrado
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/mesas/${mesaId}/productos`, {
+        const response = await fetch(`${getBackendUrl()}/mesas/${mesaId}/productos`, {
           method: 'PUT', // Usamos PUT para actualizar la lista de productos
           headers: {
             'Content-Type': 'application/json',
@@ -464,7 +471,7 @@
       }
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/mesas/${currentMesaId}`, {
+        const response = await fetch(`${getBackendUrl()}/mesas/${currentMesaId}`, {
           method: 'DELETE',
         });
 

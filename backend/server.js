@@ -93,13 +93,26 @@ let lastModifiedTime = 0; // Marca de tiempo de la última modificación de prod
 app.use(cors());
 app.use(express.json());
 
-app.use('/frontend/css', express.static(path.join(__dirname, '..', 'frontend', 'css'), {
+app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.css')) {
       res.setHeader('Content-Type', 'text/css');
+    } else if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
     }
   }
 }));
+
+app.get('/api/config', (req, res) => {
+  const protocol = req.secure ? 'https' : 'http';
+  const host = req.get('host');
+  
+  res.json({
+    backendUrl: process.env.BACKEND_URL || `${protocol}://${host}`,
+    apiTimeout: parseInt(process.env.API_TIMEOUT) || 5000,
+    refreshInterval: parseInt(process.env.REFRESH_INTERVAL) || 30000
+  });
+});
 
 // Servir archivos estáticos desde la carpeta principal del proyecto
 app.use(express.static(path.join(__dirname, '..', '/frontend/views/')));

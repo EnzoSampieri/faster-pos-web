@@ -5,7 +5,7 @@
   <title>FASTER POS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="/frontend/css/style.css">
-  <script src="/frontend/config.js"></script>
+  <script src="/frontend/js/config.js"></script>
   <style>
     body {
       display: flex;
@@ -223,6 +223,13 @@
   </div>
 
   <script>
+    // Create global config instance
+    const appConfig = new Config();
+
+    // Helper function for immediate use
+    function getBackendUrl() {
+      return appConfig.getBackendUrl();
+    }
     // JavaScript para el modal
     const adminButton = document.getElementById('adminButton');
     const adminLoginModal = document.getElementById('adminLoginModal');
@@ -257,7 +264,7 @@
       }
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/admin-login`, {
+        const response = await fetch(`${getBackendUrl()}/admin-login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
