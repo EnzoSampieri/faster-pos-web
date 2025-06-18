@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Gestión de Modificadores</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/frontend/config.js"></script>
+    <script src="/frontend/js/config.js"></script>
     <style>
         :root {
             --primary-color: #2196F3;
@@ -255,13 +255,20 @@
     </div>
 
     <script>
+        // Create global config instance
+        const appConfig = new Config();
+
+        // Helper function for immediate use
+        function getBackendUrl() {
+        return appConfig.getBackendUrl();
+        }
         let modificadores = [];
         let editingIndex = -1;
 
         // Cargar modificadores al iniciar
         async function loadModificadores() {
             try {
-                const response = await fetch(`${BACKEND_BASE_URL}/modificadores`);
+                const response = await fetch(`${getBackendUrl()}/modificadores`);
                 if (!response.ok) throw new Error('Error al cargar modificadores');
                 modificadores = await response.json();
                 renderModificadores();
@@ -377,7 +384,7 @@
         // Guardar modificadores en el backend
         async function saveModificadores() {
             try {
-                const response = await fetch(`${BACKEND_BASE_URL}/modificadores`, {
+                const response = await fetch(`${getBackendUrl()}/modificadores`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -424,6 +431,6 @@
 
         // Cargar modificadores al iniciar
         document.addEventListener('DOMContentLoaded', loadModificadores);
-    </script>
+    </>
 </body>
 </html> 

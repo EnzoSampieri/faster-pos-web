@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Comanda Touch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="/frontend/js/config.js"></script>
   <style>
     :root {
       --primary-color: #2196F3;
@@ -577,6 +577,13 @@
   </div>
 
   <script>
+    // Create global config instance
+    const appConfig = new Config();
+
+    // Helper function for immediate use
+    function getBackendUrl() {
+      return appConfig.getBackendUrl();
+    }
     // Desactivar el botón de volver y controlar la navegación del historial
     document.addEventListener('DOMContentLoaded', () => {
       const backButton = document.querySelector('.back-button');
@@ -675,7 +682,7 @@
     // Función para cargar los productos desde el backend
     async function loadProducts() {
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/productos`);
+        const response = await fetch(`${getBackendUrl()}/productos`);
         if (!response.ok) {
           throw new Error('Error al cargar la base de productos');
         }
@@ -1223,7 +1230,7 @@
         };
 
         // Guardar en mesas_abiertas.json
-        const saveResponse = await fetch(`${BACKEND_BASE_URL}/mesas`, {
+        const saveResponse = await fetch(`${getBackendUrl()}/mesas`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dataToSave),
@@ -1269,7 +1276,7 @@
         const content = `/header\n${mesa}\n${garzon}\n${personas}\n${formattedHoraApertura}\n/detalle\n${productsDetailContent}`;
 
         // Enviar el archivo TXT
-        const transferResponse = await fetch(`${BACKEND_BASE_URL}/enviar-comanda-productos`, {
+        const transferResponse = await fetch(`${getBackendUrl()}/enviar-comanda-productos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1388,7 +1395,7 @@
     // Función para cargar los modificadores desde el backend
     async function loadModificadores() {
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/modificadores`);
+        const response = await fetch(`${getBackendUrl()}/modificadores`);
         if (!response.ok) {
           throw new Error('Error al cargar los modificadores');
         }

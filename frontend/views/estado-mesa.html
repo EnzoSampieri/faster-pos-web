@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Estado de Mesas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="/frontend/js/config.js"></script>
   <style>
     :root {
       --primary-color: #2196F3;
@@ -194,6 +194,13 @@
   <button class="refresh-button" onclick="cargarEstadoMesas()">Actualizar Estado</button>
 
   <script>
+    // Create global config instance
+    const appConfig = new Config();
+
+    // Helper function for immediate use
+    function getBackendUrl() {
+      return appConfig.getBackendUrl();
+    }
     function formatearFecha(fecha) {
       return new Date(fecha).toLocaleString('es-ES', {
         year: 'numeric',
@@ -206,7 +213,7 @@
     }
 
     function cargarEstadoMesas() {
-      fetch(`${BACKEND_BASE_URL}/mesas`)
+      fetch(`${getBackendUrl()}/mesas`)
         .then(res => res.json())
         .then(mesas => {
           const container = document.getElementById('statusContainer');

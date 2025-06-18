@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Abrir Mesa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="/frontend/js/config.js"></script>
   <link rel="stylesheet" href="/frontend/css/style.css">
   <style>
     body {
@@ -371,6 +371,14 @@
   </div>
 
   <script>
+    // Create global config instance
+    const appConfig = new Config();
+
+    // Helper function for immediate use
+    function getBackendUrl() {
+      return appConfig.getBackendUrl();
+    }
+
     let etapa = 0;
     const datos = { codigo: "", mesa: "", personas: "" };
     const input = document.getElementById("inputCampo");
@@ -416,7 +424,7 @@
         const garzonId = datos.codigo;
 
         try {
-          const checkResponse = await fetch(`${BACKEND_BASE_URL}/mesas/${mesaId}`);
+          const checkResponse = await fetch(`${getBackendUrl()}/mesas/${mesaId}`);
           if (checkResponse.ok) {
             const existingMesa = await checkResponse.json();
             if (existingMesa.garzon !== garzonId) {
@@ -448,7 +456,7 @@
 
         // Primero, intentar registrar/bloquear la mesa en el backend
         try {
-          const saveMesaResponse = await fetch(`${BACKEND_BASE_URL}/mesas`, {
+          const saveMesaResponse = await fetch(`${getBackendUrl()}/mesas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -471,7 +479,7 @@
 
           // Si el registro de la mesa fue exitoso, entonces proceder a iniciar la comanda TXT
           // Llamar al nuevo endpoint para iniciar el archivo TXT de la comanda
-          const iniciarComandaTxtResponse = await fetch(`${BACKEND_BASE_URL}/iniciar-comanda-txt`, {
+          const iniciarComandaTxtResponse = await fetch(`${getBackendUrl()}/iniciar-comanda-txt`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ // Asegúrate de que horaApertura se pasa correctamente
@@ -587,7 +595,7 @@
       tablesOverlay.classList.add('show'); // Mostrar el overlay con la clase 'show'
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
+        const response = await fetch(`${getBackendUrl()}/mesas`);
         if (!response.ok) {
           throw new Error('Error al cargar las mesas abiertas.');
         }
@@ -634,7 +642,7 @@
       }
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
+        const response = await fetch(`${getBackendUrl()}/mesas`);
         if (!response.ok) {
           throw new Error('Error al cargar las mesas abiertas para verificar el botón.');
         }
