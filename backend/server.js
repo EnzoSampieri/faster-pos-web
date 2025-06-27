@@ -8,9 +8,13 @@ const { exec } = require('child_process');
 const puppeteer = require('puppeteer');
 const arp = require('node-arp');
 const util = require('util');
+const MercadoPagoOAuth = require('./mercadopago-oauth');
 const app = express();
 const PORT = 3000;
 const MESAS_DIR = path.join(__dirname, 'mesas_abiertas');
+
+// Initialize MercadoPago OAuth
+const mercadopagoOAuth = new MercadoPagoOAuth();
 
 // Asegurar que el directorio de mesas existe
 if (!fs.existsSync(MESAS_DIR)) {
@@ -1912,6 +1916,178 @@ app.post('/admin-action', isAuthenticated, async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+});
+
+// ===== MERCADOPAGO OAUTH ROUTES =====
+
+// Get OAuth authorization URL
+app.get('/mercadopago/auth', isAuthenticated, (req, res) => {
+  try {
+    if (!mercadopagoOAuth.isConfigured()) {
+      return res.status(400).json({
+        error: 'MercadoPago OAuth not configured',
+        message: 'Please set MERCADOPAGO_CLIENT_ID and MERCADOPAGO_CLIENT_SECRET environment variables'
+      });
+    }
+
+    const state = req.query.state || Math.random().toString(36).substring(7);
+    const authUrl = mercadopagoOAuth.getAuthorizationUrl(state);
+    
+    res.json({
+      success: true,
+      authUrl: authUrl,
+      state: state
+    });
+  } catch (error) {
+    console.error('Error generating auth URL:', error);
+    res.status(500).json({
+      error: 'Failed to generate authorization URL',
+      message: error.message
+    });
+  }
+});
+
+// OAuth callback endpoint
+app.get('/mercadopago/callback', async (req, res) => {
+  try {
+    const { code, state, error } = req.query;
+
+    if (error) {
+      console.error('OAuth error:', error);
+      return res.status(400).json({
+        error: 'OAuth authorization failed',
+        message: error
+      });
+    }
+
+    if (!code) {
+      return res.status(400).json({
+        error: 'Authorization code not provided'
+      });
+    }
+
+    // Exchange code for tokens
+    const tokens = await mercadopagoOAuth.exchangeCodeForToken(code);
+    
+    console.log('✅ MercadoPago OAuth authorization successful');
+    
+    // Redirect to success page or return success response
+    res.json({
+      success: true,
+      message: 'MercadoPago authorization successful',
+      user_id: tokens.user_id,
+      scope: tokens.scope
+    });
+  } catch (error) {
+    console.error('Error in OAuth callback:', error);
+    res.status(500).json({
+      error: 'OAuth callback failed',
+      message: error.message
+    });
+  }
+});
+
+// Get OAuth status
+app.get('/mercadopago/status', isAuthenticated, (req, res) => {
+  try {
+    const isConfigured = mercadopagoOAuth.isConfigured();
+    const isAuthorized = mercadopagoOAuth.isAuthorized();
+    const tokens = mercadopagoOAuth.loadTokens();
+
+    res.json({
+      configured: isConfigured,
+      authorized: isAuthorized,
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      expiresAt: tokens.expires_at,
+      userId: tokens.user_id,
+      scope: tokens.scope
+    });
+  } catch (error) {
+    console.error('Error getting OAuth status:', error);
+    res.status(500).json({
+      error: 'Failed to get OAuth status',
+      message: error.message
+    });
+  }
+});
+
+// Get user information
+app.get('/mercadopago/user', isAuthenticated, async (req, res) => {
+  try {
+    if (!mercadopagoOAuth.isAuthorized()) {
+      return res.status(401).json({
+        error: 'Not authorized',
+        message: 'Please complete OAuth authorization first'
+      });
+    }
+
+    const userInfo = await mercadopagoOAuth.getUserInfo();
+    res.json({
+      success: true,
+      user: userInfo
+    });
+  } catch (error) {
+    console.error('Error getting user info:', error);
+    res.status(500).json({
+      error: 'Failed to get user information',
+      message: error.message
+    });
+  }
+});
+
+// Revoke OAuth access
+app.post('/mercadopago/revoke', isAuthenticated, async (req, res) => {
+  try {
+    const success = await mercadopagoOAuth.revokeAccess();
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Access revoked successfully'
+      });
+    } else {
+      res.status(500).json({
+        error: 'Failed to revoke access'
+      });
+    }
+  } catch (error) {
+    console.error('Error revoking access:', error);
+    res.status(500).json({
+      error: 'Failed to revoke access',
+      message: error.message
+    });
+  }
+});
+
+// Test MercadoPago API connection
+app.get('/mercadopago/test', isAuthenticated, async (req, res) => {
+  try {
+    if (!mercadopagoOAuth.isAuthorized()) {
+      return res.status(401).json({
+        error: 'Not authorized',
+        message: 'Please complete OAuth authorization first'
+      });
+    }
+
+    const accessToken = await mercadopagoOAuth.getValidAccessToken();
+    
+    // Test API call - get user info
+    const userInfo = await mercadopagoOAuth.getUserInfo();
+    
+    res.json({
+      success: true,
+      message: 'MercadoPago API connection successful',
+      user: userInfo,
+      tokenValid: true
+    });
+  } catch (error) {
+    console.error('Error testing MercadoPago API:', error);
+    res.status(500).json({
+      error: 'MercadoPago API test failed',
+      message: error.message
     });
   }
 });

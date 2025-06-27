@@ -13,6 +13,7 @@
   "items": [
     {
       "product": {
+        "externalId": "23232324",
         "name": "Coca Cola de 955 ml"
       },
       "comment": "",
@@ -28,16 +29,17 @@
         "externalId": "23232323",
         "name": "Hamburguesa Oklahoma"
       },
-      "comment": "",
-      "amount": 3,
-      "unitPrice": 955.6666666666666,
-      "baseUnitPrice": 955.6666666666666,
+      "comment": "Sin val",
+      "amount": 1,
+      "unitPrice": 2867,
+      "baseUnitPrice": 2867,
       "productPrice": 2867,
       "productBasePrice": 2867,
       "modifiers": []
     },
     {
       "product": {
+        "externalId": "23232325",
         "name": "Fudge brownie de cacao"
       },
       "comment": "",
