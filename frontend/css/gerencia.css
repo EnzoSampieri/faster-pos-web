@@ -1,0 +1,431 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.header-section {
+  background: var(--primary-color);
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.back-button {
+  background: #FF9800;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.back-button:hover {
+  background: #E68A00;
+}
+.logo-header {
+  flex-grow: 1;
+  text-align: center;
+}
+.logo-text {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.search-section {
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.search-section h3 {
+  color: var(--text-color);
+  margin-bottom: 10px;
+}
+.search-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 1.1em;
+  text-align: center;
+}
+#table-overview-container {
+  flex-grow: 1;
+  height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+#table-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  max-width: 1200px;
+  width: 100%;
+}
+.table-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 120px;
+}
+.table-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.table-id {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+.table-waiter {
+  font-size: 1em;
+  color: #666;
+}
+
+/* Estilos para el modal de detalle de mesa */
+.table-detail-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.table-detail-modal-overlay.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.table-detail-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  width: 95%;
+  max-width: 800px;
+  transform: translateY(-30px);
+  transition: transform 0.3s ease-out;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.table-detail-modal-overlay.visible .table-detail-modal-content {
+  transform: translateY(0);
+}
+
+.table-detail-modal-content h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.table-detail-info p {
+  margin-bottom: 8px;
+}
+
+.table-detail-products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table-detail-products-table th,
+.table-detail-products-table td {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.table-detail-products-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Botones de acción para productos */
+.action-button {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  margin: 2px;
+}
+
+.action-button.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.action-button.delete-button:hover {
+  background-color: #d32f2f;
+}
+
+.action-button.move-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.action-button.move-button:hover {
+  background-color: #1976D2;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons .close-button {
+  background-color: #ccc;
+  color: var(--text-color);
+}
+
+.modal-buttons .close-button:hover {
+  background-color: #bbb;
+}
+
+.modal-buttons .delete-table-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.modal-buttons .delete-table-button:hover {
+  background-color: #d32f2f;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  display: none;
+}
+
+.message.success {
+  background-color: #e8f5e9;
+  color: #28a745;
+}
+
+.message.error {
+  background-color: #ffebee;
+  color: #dc3545;
+}
+
+.message.info {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+/* Estilos para el modal de confirmación */
+.confirmation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.confirmation-modal-overlay.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.confirmation-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  width: 95%;
+  max-width: 500px;
+  transform: translateY(-30px);
+  transition: transform 0.3s ease-out;
+}
+
+.confirmation-modal-overlay.visible .confirmation-modal-content {
+  transform: translateY(0);
+}
+
+.confirmation-modal-content h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.confirmation-info {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.confirmation-info p {
+  margin: 5px 0;
+}
+
+.confirmation-form {
+  margin-bottom: 20px;
+}
+
+.confirmation-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.confirmation-form textarea,
+.confirmation-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.confirmation-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+#moveToMesaSection {
+  margin-top: 15px;
+}
+
+.confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.confirmation-buttons button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 100px;
+}
+
+.cancel-button {
+  background-color: #ccc;
+  color: var(--text-color);
+}
+
+.cancel-button:hover {
+  background-color: #bbb;
+}
+
+.confirm-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.confirm-button:hover {
+  background-color: #388E3C;
+}
+
+.confirm-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    padding: 10px;
+  }
+  .back-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .logo-header {
+    margin-top: 10px;
+  }
+  #table-overview-container {
+    height: auto;
+    flex-grow: 1;
+  }
+  #table-overview {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .table-card {
+    height: 100px;
+  }
+  .table-id {
+    font-size: 1.8em;
+  }
+  .table-waiter {
+    font-size: 0.9em;
+  }
+  .confirmation-modal-content {
+    padding: 20px;
+    margin: 10px;
+  }
+  .confirmation-buttons {
+    flex-direction: column;
+  }
+  .confirmation-buttons button {
+    width: 100%;
+  }
+}
+@media (max-width: 400px) {
+  #table-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+} 

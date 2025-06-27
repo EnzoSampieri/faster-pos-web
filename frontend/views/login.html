@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - FASTER POS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script src="../config.js"></script>
+  <style>
+    :root {
+      --primary-color: #2196F3;
+      --secondary-color: #4CAF50;
+      --background-color: #f5f5f5;
+      --text-color: #333;
+      --border-color: #ddd;
+      --error-color: #f44336;
+      --success-color: #4CAF50;
+      --warning-color: #ff9800;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-header {
+      margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+      color: var(--primary-color);
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .login-header p {
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .login-button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .login-button:hover {
+      background: #1976D2;
+    }
+
+    .login-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: var(--error-color);
+      border: 1px solid #ffcdd2;
+    }
+
+    .message.warning {
+      background: #fff3e0;
+      color: var(--warning-color);
+      border: 1px solid #ffcc02;
+    }
+
+    .message.success {
+      background: #e8f5e8;
+      color: var(--success-color);
+      border: 1px solid #c8e6c9;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-color);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .login-container {
+        padding: 30px 20px;
+        margin: 10px;
+      }
+      
+      .login-header h1 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>FASTER POS</h1>
+      <p>Iniciar Sesión</p>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <form class="login-form" id="loginForm">
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <input type="text" id="username" name="username" required autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="login-button" id="loginButton">
+        Iniciar Sesión
+      </button>
+    </form>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Verificando dispositivo...</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('loginForm');
+      const loginButton = document.getElementById('loginButton');
+      const loading = document.getElementById('loading');
+      const messageContainer = document.getElementById('messageContainer');
+
+      function showMessage(message, type = 'error') {
+        messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+      }
+
+      function showLoading(show) {
+        if (show) {
+          loading.classList.add('show');
+          loginButton.disabled = true;
+        } else {
+          loading.classList.remove('show');
+          loginButton.disabled = false;
+        }
+      }
+
+      function clearMessage() {
+        messageContainer.innerHTML = '';
+      }
+
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const codigo = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!codigo || !password) {
+          showMessage('Por favor, complete todos los campos.');
+          return;
+        }
+
+        clearMessage();
+        showLoading(true);
+
+        try {
+          const response = await fetch(`${BACKEND_BASE_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            if (data.status === 'success') {
+              // Guardar el rol y el código del usuario en sessionStorage
+              sessionStorage.setItem('userRole', data.rol);
+              sessionStorage.setItem('userCode', data.userCode);
+              
+              showMessage('Inicio de sesión exitoso. Redirigiendo...', 'success');
+              
+              // Redirigir según el rol
+              setTimeout(() => {
+                if (data.rol === 'administrador' || data.rol === 'admin') {
+                  window.location.href = 'gerencia.html';
+                } else {
+                  window.location.href = 'inicio.html';
+                }
+              }, 500); // Reducir el tiempo de espera
+
+            } else if (data.status === 'device_pending') {
+              showMessage('Dispositivo no autorizado, debe ser aprobado por administración.', 'warning');
+            } else {
+              // Otros casos de éxito que no son 'success' (si los hubiera)
+              showMessage(data.message || 'Respuesta inesperada del servidor.', 'warning');
+            }
+          } else {
+            // Si la respuesta no es OK (ej. 401, 404, 500)
+            showMessage(data.message || 'Error en el inicio de sesión.', 'error');
+          }
+        } catch (error) {
+          console.error('Error en login:', error);
+          showMessage('Error de conexión. Verifique su conexión a internet.', 'error');
+        } finally {
+          showLoading(false);
+        }
+      });
+
+      // Limpiar mensajes al cambiar campos
+      document.getElementById('username').addEventListener('input', clearMessage);
+      document.getElementById('password').addEventListener('input', clearMessage);
+    });
+  </script>
+</body>
+</html> 

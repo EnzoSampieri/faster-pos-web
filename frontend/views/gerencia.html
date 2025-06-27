@@ -4,256 +4,25 @@
   <meta charset="UTF-8">
   <title>Panel de Administración</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="../config.js"></script>
   <link rel="stylesheet" href="/frontend/css/style.css">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .header-section {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .header-section h1 {
-      color: var(--primary-blue);
-      font-size: 2em;
-      margin: 0;
-      flex-grow: 1;
-      text-align: center;
-    }
-
-    .logout-button {
-      background-color: #f44336; /* Rojo */
-      color: white;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .logout-button:hover {
-      background-color: #d32f2f;
-    }
-
-    .tables-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .table-card {
-      background-color: var(--white);
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .table-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
-
-    .table-card h3 {
-      margin: 0 0 10px 0;
-      color: var(--primary-blue);
-      font-size: 1.5em;
-    }
-
-    .table-card p {
-      margin: 0;
-      font-size: 0.95em;
-      color: var(--text-color);
-    }
-
-    .table-card .status {
-      font-weight: bold;
-      color: var(--secondary-color); /* Verde */
-    }
-
-    .table-detail-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-
-    .table-detail-modal-overlay.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .table-detail-modal-content {
-      background: var(--white);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-      width: 95%;
-      max-width: 700px;
-      transform: translateY(-30px);
-      transition: transform 0.3s ease-out;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .table-detail-modal-overlay.visible .table-detail-modal-content {
-      transform: translateY(0);
-    }
-
-    .table-detail-modal-content h3 {
-      color: var(--primary-blue);
-      margin-top: 0;
-      margin-bottom: 20px;
-    }
-
-    .table-detail-info p {
-      margin-bottom: 8px;
-    }
-
-    .table-detail-products-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .table-detail-products-table th,
-    .table-detail-products-table td {
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      text-align: left;
-    }
-
-    .table-detail-products-table th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-    }
-
-    .delete-product-button {
-      background-color: #f44336;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 0.8em;
-      transition: background-color 0.2s ease;
-    }
-
-    .delete-product-button:hover {
-      background-color: #d32f2f;
-    }
-
-    .modal-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .modal-buttons button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .modal-buttons .close-button {
-      background-color: #ccc;
-      color: var(--text-color);
-    }
-
-    .modal-buttons .close-button:hover {
-      background-color: #bbb;
-    }
-
-    .modal-buttons .delete-table-button {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .modal-buttons .delete-table-button:hover {
-      background-color: #d32f2f;
-    }
-
-    .message {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      text-align: center;
-      display: none; /* Oculto por defecto */
-    }
-
-    .message.success {
-      background-color: #e8f5e9; /* Verde claro */
-      color: #28a745; /* Verde oscuro */
-    }
-
-    .message.error {
-      background-color: #ffebee; /* Rojo claro */
-      color: #dc3545; /* Rojo oscuro */
-    }
-
-    @media (max-width: 768px) {
-      .tables-container {
-        grid-template-columns: 1fr;
-      }
-      .header-section h1 {
-        font-size: 1.8em;
-      }
-      .logout-button {
-        padding: 8px 15px;
-        font-size: 0.9em;
-      }
-      .table-detail-modal-content {
-        padding: 20px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/frontend/css/gerencia.css">
 </head>
 <body>
   <div class="header-section">
-    <h1>Panel de Administración</h1>
-    <button class="logout-button" onclick="logoutAdmin()">Cerrar Sesión</button>
+    <button class="back-button" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+    <div class="logo-header">
+      <div class="logo-text">Panel de Administración</div>
+    </div>
   </div>
-
-  <div id="tablesContainer" class="tables-container">
-    <!-- Las tarjetas de mesa se renderizarán aquí -->
-    <p style="text-align: center; width: 100%; color: #666;">Cargando mesas...</p>
+  <div class="search-section">
+    <h3>Buscar mesa</h3>
+    <input type="number" id="mesaSearchInput" class="search-input" placeholder="Ej: 5, 12, etc.">
   </div>
-
+  <div id="table-overview-container">
+    <div id="table-overview"></div>
+  </div>
+  <div id="table-detail"></div>
   <!-- Modal de Detalle de Mesa -->
   <div class="table-detail-modal-overlay" id="tableDetailModal">
     <div class="table-detail-modal-content">
@@ -273,7 +42,7 @@
             <th>Cantidad</th>
             <th>Precio Unit.</th>
             <th>Mensaje</th>
-            <th>Acción</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody id="detailProductsBody">
@@ -290,13 +59,47 @@
     </div>
   </div>
 
+  <!-- Modal de Confirmación para Anulación/Movimiento -->
+  <div class="confirmation-modal-overlay" id="confirmationModal">
+    <div class="confirmation-modal-content">
+      <h3 id="confirmationTitle"></h3>
+      <div class="confirmation-info">
+        <p><strong>Mesa:</strong> <span id="confirmationMesa"></span></p>
+        <p><strong>Producto:</strong> <span id="confirmationProducto"></span></p>
+        <p><strong>Cantidad:</strong> <span id="confirmationCantidad"></span></p>
+        <p><strong>Precio:</strong> <span id="confirmationPrecio"></span></p>
+      </div>
+      
+      <div class="confirmation-form">
+        <label for="confirmationMotivo">Motivo del cambio o anulación:</label>
+        <textarea id="confirmationMotivo" placeholder="Ingrese el motivo..." rows="4"></textarea>
+        
+        <div id="moveToMesaSection" style="display: none;">
+          <label for="moveToMesa">Mover a mesa:</label>
+          <input type="number" id="moveToMesa" placeholder="Número de mesa destino" min="1">
+        </div>
+      </div>
+      
+      <div class="confirmation-buttons">
+        <button class="cancel-button" onclick="closeConfirmationModal()">Cancelar</button>
+        <button class="confirm-button" id="confirmActionButton">Confirmar</button>
+      </div>
+      
+      <div id="confirmationMessage" class="message"></div>
+    </div>
+  </div>
+
   <script>
     // 1. Verificación de Autenticación
     if (sessionStorage.getItem('adminAuthenticated') !== 'true') {
       window.location.href = 'inicio.html';
     }
 
-    const tablesContainer = document.getElementById('tablesContainer');
+    let tables = [];
+    const overviewContainer = document.getElementById('table-overview-container');
+    const overviewDiv = document.getElementById('table-overview');
+    const detailDiv = document.getElementById('table-detail');
+    const mesaSearchInput = document.getElementById('mesaSearchInput');
     const tableDetailModal = document.getElementById('tableDetailModal');
     const detailMesaId = document.getElementById('detailMesaId');
     const detailGarzon = document.getElementById('detailGarzon');
@@ -306,9 +109,24 @@
     const detailTotal = document.getElementById('detailTotal');
     const detailActionMessage = document.getElementById('detailActionMessage');
     const detailProductsMessage = document.getElementById('detailProductsMessage');
-
-    let currentTablesData = {}; // Para guardar los datos de todas las mesas
-    let currentMesaId = null; // Para la mesa que se está viendo en el modal
+    
+    // Variables para el modal de confirmación
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmationTitle = document.getElementById('confirmationTitle');
+    const confirmationMesa = document.getElementById('confirmationMesa');
+    const confirmationProducto = document.getElementById('confirmationProducto');
+    const confirmationCantidad = document.getElementById('confirmationCantidad');
+    const confirmationPrecio = document.getElementById('confirmationPrecio');
+    const confirmationMotivo = document.getElementById('confirmationMotivo');
+    const moveToMesaSection = document.getElementById('moveToMesaSection');
+    const moveToMesa = document.getElementById('moveToMesa');
+    const confirmActionButton = document.getElementById('confirmActionButton');
+    const confirmationMessage = document.getElementById('confirmationMessage');
+    
+    let currentTablesData = {};
+    let currentMesaId = null;
+    let currentAction = null; // 'anular' o 'mover'
+    let currentProductIndex = null;
 
     // Funciones de utilidad para mensajes
     function showMessage(element, msg, type) {
@@ -323,52 +141,57 @@
       element.className = 'message';
     }
 
-    // 2. Cargar y Renderizar Mesas
-    async function loadTables() {
-      tablesContainer.innerHTML = '<p style="text-align: center; width: 100%; color: #666;">Cargando mesas...</p>';
-      hideMessage(detailActionMessage);
-      hideMessage(detailProductsMessage);
+    // Cargar mesas y renderizar grid
+    async function fetchMesasGerencia() {
+      overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto; text-align: center;">Cargando mesas...</div>';
       try {
         const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
-        if (!response.ok) {
-          throw new Error('Error al cargar las mesas abiertas.');
-        }
-        currentTablesData = await response.json();
-        renderTables();
-      } catch (error) {
-        console.error('Error al cargar mesas:', error);
-        tablesContainer.innerHTML = `<p style="text-align: center; width: 100%; color: #D32F2F;">Error: ${error.message}. No se pudieron cargar las mesas.</p>`;
+        if (!response.ok) throw new Error('Error al cargar las mesas abiertas.');
+        const data = await response.json();
+        tables = Object.values(data);
+        tables.sort((a, b) => parseInt(a.mesa) - parseInt(b.mesa));
+        renderOverview(tables);
+      } catch (e) {
+        overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto; text-align: center;">No se pudo conectar al servidor.</div>';
       }
     }
 
-    function renderTables() {
-      tablesContainer.innerHTML = '';
-      const mesasArray = Object.values(currentTablesData);
-      if (mesasArray.length === 0) {
-        tablesContainer.innerHTML = '<p style="text-align: center; width: 100%; color: #666;">No hay mesas abiertas actualmente.</p>';
+    function renderOverview(filteredTables) {
+      detailDiv.style.display = 'none';
+      overviewContainer.style.display = 'flex';
+      overviewDiv.innerHTML = '';
+      if (filteredTables.length === 0) {
+        overviewDiv.innerHTML = '<div style="font-size:1.2em;color:#888;margin:40px auto; text-align: center;">No hay mesas abiertas actualmente.</div>';
         return;
       }
-      mesasArray.sort((a, b) => parseInt(a.mesa) - parseInt(b.mesa)); // Ordenar por número de mesa
-
-      mesasArray.forEach(table => {
+      filteredTables.forEach(table => {
         const card = document.createElement('div');
         card.className = 'table-card';
-        card.innerHTML = `
-          <h3>Mesa ${table.mesa}</h3>
-          <p>Garzón: ${table.garzon}</p>
-          <p>Personas: ${table.personas}</p>
-          <p>Hora Apertura: ${table.horaApertura || 'N/A'}</p>
-          <p class="status">Estado: Abierta</p>
-        `;
+        card.setAttribute('data-status', 'open');
         card.onclick = () => showTableDetail(table.mesa);
-        tablesContainer.appendChild(card);
+        card.innerHTML = `
+          <div class="table-id">Mesa ${table.mesa}</div>
+          <div class="table-waiter">Garzón: ${table.garzon}</div>
+        `;
+        overviewDiv.appendChild(card);
       });
     }
+
+    // Búsqueda
+    mesaSearchInput.addEventListener('input', () => {
+      const searchTerm = mesaSearchInput.value.trim();
+      if (searchTerm === '') {
+        renderOverview(tables);
+      } else {
+        const filtered = tables.filter(table => String(table.mesa).includes(searchTerm));
+        renderOverview(filtered);
+      }
+    });
 
     // 3. Mostrar Detalle de Mesa en Modal
     function showTableDetail(mesaId) {
       currentMesaId = mesaId;
-      const table = currentTablesData[mesaId];
+      const table = tables.find(t => t.mesa == mesaId);
       if (!table) {
         showMessage(detailActionMessage, 'Error: Mesa no encontrada.', 'error');
         return;
@@ -393,7 +216,10 @@
             <td>${product.cantidad}</td>
             <td>$${parseFloat(product.precio).toFixed(2)}</td>
             <td>${product.message || ''}</td>
-            <td><button class="delete-product-button" onclick="deleteProduct('${mesaId}', ${index})">Eliminar</button></td>
+            <td>
+              <button class="action-button delete-button" onclick="showConfirmationModal('anular', ${index})">Eliminar</button>
+              <button class="action-button move-button" onclick="showConfirmationModal('mover', ${index})">Mover</button>
+            </td>
           `;
           detailProductsBody.appendChild(row);
         });
@@ -419,43 +245,167 @@
       }
     });
 
-    // 4. Eliminar Producto Individual
-    async function deleteProduct(mesaId, productIndex) {
-      if (!confirm(`¿Estás seguro de eliminar el producto ${currentTablesData[mesaId].productos[productIndex].nombre} de la Mesa ${mesaId}?`)) {
+    // 4. Modal de Confirmación para Anulación/Movimiento
+    function showConfirmationModal(action, productIndex) {
+      currentAction = action;
+      currentProductIndex = productIndex;
+      
+      const table = tables.find(t => t.mesa == currentMesaId);
+      const product = table.productos[productIndex];
+      
+      confirmationTitle.textContent = action === 'anular' ? 'Confirmar Anulación' : 'Confirmar Movimiento';
+      confirmationMesa.textContent = currentMesaId;
+      confirmationProducto.textContent = product.nombre;
+      confirmationCantidad.textContent = product.cantidad;
+      confirmationPrecio.textContent = `$${parseFloat(product.precio).toFixed(2)}`;
+      
+      // Mostrar/ocultar sección de mesa destino
+      if (action === 'mover') {
+        moveToMesaSection.style.display = 'block';
+        moveToMesa.value = '';
+      } else {
+        moveToMesaSection.style.display = 'none';
+      }
+      
+      confirmationMotivo.value = '';
+      hideMessage(confirmationMessage);
+      
+      // Configurar botón de confirmación
+      confirmActionButton.textContent = action === 'anular' ? 'Anular Producto' : 'Mover Producto';
+      confirmActionButton.onclick = () => processAction();
+      
+      confirmationModal.classList.add('visible');
+    }
+
+    function closeConfirmationModal() {
+      confirmationModal.classList.remove('visible');
+      currentAction = null;
+      currentProductIndex = null;
+    }
+
+    // Cerrar modal de confirmación al hacer clic fuera
+    confirmationModal.addEventListener('click', (e) => {
+      if (e.target === confirmationModal) {
+        closeConfirmationModal();
+      }
+    });
+
+    // 5. Procesar acción (anular o mover)
+    async function processAction() {
+      const motivo = confirmationMotivo.value.trim();
+      if (!motivo) {
+        showMessage(confirmationMessage, 'Debe ingresar un motivo.', 'error');
         return;
       }
 
-      const updatedProducts = [...currentTablesData[mesaId].productos];
-      const deletedProduct = updatedProducts.splice(productIndex, 1)[0]; // Eliminar y obtener el producto borrado
+      if (currentAction === 'mover') {
+        const mesaDestino = moveToMesa.value.trim();
+        if (!mesaDestino) {
+          showMessage(confirmationMessage, 'Debe especificar la mesa destino.', 'error');
+          return;
+        }
+        
+        // Verificar que la mesa destino existe
+        const mesaDestinoExists = tables.find(t => t.mesa == mesaDestino);
+        if (!mesaDestinoExists) {
+          showMessage(confirmationMessage, 'La mesa destino no existe.', 'error');
+          return;
+        }
+        
+        if (mesaDestino == currentMesaId) {
+          showMessage(confirmationMessage, 'No puede mover a la misma mesa.', 'error');
+          return;
+        }
+      }
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/mesas/${mesaId}/productos`, {
-          method: 'PUT', // Usamos PUT para actualizar la lista de productos
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ productos: updatedProducts, mesa: mesaId }), // Enviamos la lista actualizada
+        confirmActionButton.disabled = true;
+        confirmActionButton.textContent = 'Procesando...';
+        
+        const table = tables.find(t => t.mesa == currentMesaId);
+        const product = table.productos[currentProductIndex];
+        
+        // Generar archivo TXT según la acción
+        const txtContent = generateTxtFile(currentAction, table, product, motivo);
+        
+        // Enviar al backend
+        const response = await fetch(`${BACKEND_BASE_URL}/admin-action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: currentAction,
+            mesaOrigen: currentMesaId,
+            mesaDestino: currentAction === 'mover' ? moveToMesa.value : null,
+            productIndex: currentProductIndex,
+            motivo: motivo,
+            txtContent: txtContent
+          })
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Error al eliminar el producto.');
+          throw new Error('Error al procesar la acción');
         }
 
-        // Actualizar el frontend después de la eliminación exitosa
-        currentTablesData[mesaId].productos = updatedProducts;
-        showTableDetail(mesaId); // Volver a renderizar el detalle de la mesa
-        showMessage(detailActionMessage, `✅ Producto '${deletedProduct.nombre}' eliminado.`, 'success');
-        // También recargar la vista general de mesas por si el total cambió
-        loadTables();
-
+        const result = await response.json();
+        
+        if (result.success) {
+          showMessage(confirmationMessage, `✅ ${currentAction === 'anular' ? 'Producto anulado' : 'Producto movido'} exitosamente.`, 'success');
+          
+          // Actualizar la vista
+          await fetchMesasGerencia();
+          if (currentMesaId) {
+            showTableDetail(currentMesaId);
+          }
+          
+          // Cerrar modal después de 2 segundos
+          setTimeout(() => {
+            closeConfirmationModal();
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Error desconocido');
+        }
+        
       } catch (error) {
-        console.error('Error al eliminar producto:', error);
-        showMessage(detailActionMessage, `❌ Error al eliminar producto: ${error.message}`, 'error');
+        console.error('Error al procesar acción:', error);
+        showMessage(confirmationMessage, `❌ Error: ${error.message}`, 'error');
+      } finally {
+        confirmActionButton.disabled = false;
+        confirmActionButton.textContent = currentAction === 'anular' ? 'Anular Producto' : 'Mover Producto';
       }
     }
 
-    // 5. Eliminar Mesa Completa
+    // 6. Generar archivo TXT
+    function generateTxtFile(action, table, product, motivo) {
+      const idGarzon = localStorage.getItem('id-garzon') || table['id-garzon'] || 'N/A';
+      const hora = table.horaApertura || new Date().toLocaleTimeString();
+      
+      let content = `/header\n`;
+      content += `${table.mesa}\n`;
+      content += `${idGarzon}\n`;
+      content += `${table.personas}\n`;
+      content += `${hora}\n`;
+      
+      if (action === 'anular') {
+        content += `/anulacion\n`;
+        content += `${product.nombre}\n`;
+        content += `-${product.cantidad}\n`; // Cantidad negativa
+        content += `${product.precio}\n`;
+        content += `${product.message || ''}\n`;
+        content += `Motivo: ${motivo}\n`;
+      } else if (action === 'mover') {
+        content += `/cambio\n`;
+        content += `${product.nombre}\n`;
+        content += `${product.cantidad}\n`;
+        content += `${product.precio}\n`;
+        content += `${product.message || ''}\n`;
+        content += `Mover a mesa: ${moveToMesa.value}\n`;
+        content += `Motivo: ${motivo}\n`;
+      }
+      
+      return content;
+    }
+
+    // 7. Eliminar Mesa Completa (mantener funcionalidad existente)
     async function confirmDeleteTable() {
       if (!currentMesaId) return;
 
@@ -474,24 +424,17 @@
         }
 
         showMessage(detailActionMessage, `✅ Mesa ${currentMesaId} eliminada exitosamente.`, 'success');
-        delete currentTablesData[currentMesaId]; // Eliminar del objeto local
-        renderTables(); // Volver a renderizar la vista general
-        closeTableDetailModal(); // Cerrar el modal
-        alert(`Mesa ${currentMesaId} eliminada correctamente.`); // Confirmación final
+        fetchMesasGerencia();
+        closeTableDetailModal();
+        alert(`Mesa ${currentMesaId} eliminada correctamente.`);
       } catch (error) {
         console.error('Error al eliminar mesa:', error);
         showMessage(detailActionMessage, `❌ Error al eliminar mesa: ${error.message}`, 'error');
       }
     }
 
-    // Función para cerrar sesión
-    function logoutAdmin() {
-      sessionStorage.removeItem('adminAuthenticated');
-      window.location.href = 'inicio.html';
-    }
-
     // Cargar mesas al inicio
-    document.addEventListener('DOMContentLoaded', loadTables);
+    document.addEventListener('DOMContentLoaded', fetchMesasGerencia);
   </script>
 </body>
 </html> 

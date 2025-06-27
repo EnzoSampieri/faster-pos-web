@@ -4,519 +4,8 @@
   <meta charset="UTF-8">
   <title>Comanda Touch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
-  <style>
-    :root {
-      --primary-color: #2196F3;
-      --secondary-color: #4CAF50;
-      --background-color: #f5f5f5;
-      --text-color: #333;
-      --border-color: #ddd;
-      --button-height: 48px;
-      --header-height: 60px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: var(--background-color);
-      color: var(--text-color);
-      height: 100vh;
-      overflow: hidden; /* Evita el scroll general de la página */
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      height: var(--header-height);
-      background: var(--primary-color);
-      color: white;
-      padding: 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      flex-shrink: 0; /* Asegura que no se encoja */
-    }
-
-    .header-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .back-button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: default;
-      padding: 8px;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .order-section {
-      background: white;
-      border-bottom: 1px solid var(--border-color);
-      overflow-y: auto;
-      padding: 16px;
-      transition: flex-basis 0.3s, padding-bottom 0.3s;
-      flex: 1 1 60vh;
-      min-height: 40vh;
-      max-height: 60vh;
-      box-sizing: border-box;
-      margin-top:40px;
-    }
-
-
-    .order-section.revision {
-      flex-basis: 60vh;
-      min-height: 40vh;
-      max-height: 70vh;
-      padding-bottom: 0 !important;
-    }
-
-    .order-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .order-table th,
-    .order-table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .order-table th {
-      background: #f8f9fa;
-      font-weight: 600;
-    }
-
-    .product-section {
-      display: flex;
-      flex-direction: column;
-      background: white;
-      position: relative;
-      flex: 0 0 auto;
-      min-height: 0;
-      max-height: 35vh;
-      overflow: visible;
-      justify-content: flex-start;
-      margin-top: 0 !important;
-    }
-
-    .familias {
-      transition: opacity 0.2s, max-height 0.2s;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 10px;
-      padding: 8px 15px 8px 15px;
-      margin-top: 0 !important;
-      margin-bottom: 0;
-      background: #f8f9fa;
-      border-bottom: 1px solid var(--border-color);
-      overflow-x: auto;
-      overflow-y: auto;
-      max-height: 35vh;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .familias button {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 15px 10px;
-      font-size: 0.9em;
-      font-weight: bold;
-      color: var(--text-color);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      text-align: center;
-      min-height: 80px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .familias button:hover {
-      background-color: #f0f0f0;
-      border-color: var(--primary-color);
-    }
-
-    .familias button:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .familias button i {
-      font-size: 1.5em;
-      margin-bottom: 5px;
-    }
-
-    /* Nuevo: Estilos para los botones de Acceso Rápido */
-    .quick-access-subfamilies .quick-access-button {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 15px 10px;
-      font-size: 0.9em;
-      font-weight: bold;
-      color: var(--text-color);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      text-align: center;
-      min-height: 80px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .quick-access-subfamilies .quick-access-button:hover {
-      background-color: #f0f0f0;
-      border-color: var(--primary-color);
-    }
-
-    /* Nuevo: Estilos para el panel deslizante de productos */
-    .productos {
-      position: fixed; /* Posición fija para que se deslice desde abajo */
-      bottom: 20vh; /* Se abre un 20% más arriba desde el borde inferior */
-      left: 0;
-      right: 0;
-      max-height: 60vh; /* Altura máxima para el scroll */
-      transform: translateY(100%); /* Inicialmente oculto fuera de la pantalla */
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out, visibility 0.3s ease-out; /* Animación de deslizamiento, opacidad y visibilidad */
-      z-index: 100000; /* Aumentado drásticamente el z-index para asegurar que siempre esté por encima */
-      background: white;
-      display: none; /* Por defecto no ocupa espacio en el layout */
-      flex-direction: column;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
-      opacity: 0; /* Oculto por defecto */
-      pointer-events: none; /* No interactuable por defecto */
-      visibility: hidden; /* Oculto por defecto */
-    }
-
-    .productos.active {
-      transform: translateY(0); /* Visible en la posición deseada */
-      opacity: 1; /* Visible cuando está activo */
-      pointer-events: auto; /* Interactuable cuando está activo */
-      visibility: visible; /* Visible cuando está activo */
-    }
-
-    .products-header {
-      padding: 15px;
-      background-color: white;
-      border-bottom: 1px solid var(--border-color);
-      flex-shrink: 0; /* Evita que el encabezado se encoja */
-      display: flex;
-      justify-content: flex-end; /* Alinea el botón a la derecha */
-    }
-
-    .close-products-button {
-      padding: 10px 20px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .close-products-button:hover {
-      background-color: #1976D2;
-    }
-
-    .products-grid-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 15px;
-      transition: padding-bottom 0.3s;
-    }
-
-    .products-grid-container .product-card {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-height: 120px;
-    }
-
-    .products-grid-container .product-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .products-grid-container .product-name {
-      font-weight: 600;
-      font-size: 1.1em;
-      color: var(--text-color);
-    }
-
-    .products-grid-container .product-price {
-      color: var(--primary-color);
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-top: 5px;
-    }
-
-    .products-grid-container .product-card.associated {
-      background-color: #e3f2fd;
-      border-color: var(--primary-color);
-    }
-
-    /* Asegura que el contenedor principal de botones tenga espacio para los flotantes */
-    .action-buttons {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      left: 16px;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-      display: flex;
-      gap: 8px;
-      z-index: 90000;
-      flex-shrink: 0;
-      background: transparent;
-    }
-
-    .action-button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 24px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      flex: 1;
-    }
-
-    .send-button {
-      background: var(--secondary-color);
-    }
-
-    .update-button {
-      background: var(--primary-color);
-    }
-
-    .add-more-button {
-      background: var(--primary-color);
-    }
-
-    .action-button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      opacity: 0.7;
-    }
-
-    .quantity-control {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .quantity-button {
-      width: 24px;
-      height: 24px;
-      border: none;
-      border-radius: 4px;
-      background: var(--primary-color);
-      color: white;
-      cursor: pointer;
-    }
-
-    .remove-button {
-      color: #dc3545;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    /* Estilos del Modal de Mensaje */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-
-    .modal-overlay.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 400px;
-      transform: translateY(-20px);
-      transition: transform 0.3s ease-out;
-    }
-
-    .modal-overlay.visible .modal-content {
-      transform: translateY(0);
-    }
-
-    .modal-content h3 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      color: var(--primary-color);
-    }
-
-    .modal-content textarea {
-      width: calc(100% - 20px);
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 1em;
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .modal-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .modal-buttons button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .modal-buttons .save-button {
-      background-color: var(--secondary-color);
-      color: white;
-    }
-
-    .modal-buttons .save-button:hover {
-      background-color: #388E3C;
-    }
-
-    .modal-buttons .cancel-button {
-      background-color: #ccc;
-      color: var(--text-color);
-    }
-
-    .modal-buttons .cancel-button:hover {
-      background-color: #bbb;
-    }
-
-    /* Estilos para los modificadores */
-    .modificador-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .modificador-option {
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background-color: white;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 1em;
-      text-align: left;
-    }
-
-    .modificador-option:hover {
-      background-color: #f0f0f0;
-      border-color: var(--primary-color);
-    }
-
-    .modificador-option:active {
-      transform: translateY(1px);
-      background-color: #e0e0e0;
-    }
-
-    .modificador-option.selected {
-      background-color: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-
-    /* Agregar estilos CSS para los productos agregados */
-    .producto-agregado {
-      background-color: #f8f9fa;
-    }
-    .producto-agregado td:first-child {
-      padding-left: 2em;
-    }
-    .producto-principal {
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    .oculto {
-      opacity: 0 !important;
-      max-height: 0 !important;
-      pointer-events: none !important;
-      overflow: hidden !important;
-    }
-
-    .familias.con-botones-flotantes,
-    .products-grid-container.con-botones-flotantes {
-      padding-bottom: 110px !important;
-    }
-  </style>
+  <script src="../config.js"></script>
+  <link rel="stylesheet" href="css/pedidos.css">
 </head>
 <body>
   <div class="header">
@@ -557,7 +46,9 @@
     </section>
   </div>
 
-  <div class="action-buttons">
+  <div class="action-buttons-static">
+      <button class="action-button family-button-static" onclick="irAVolver()">VOLVER</button>
+
     <button class="action-button update-button" onclick="revisarComanda()">REVISAR COMANDA</button>
     <button class="action-button add-more-button" onclick="agregarMasProductos()" id="addMoreButton" style="display: none;">AGREGAR MÁS PRODUCTOS</button>
     <button class="action-button send-button" onclick="enviarComanda()" id="sendButton" disabled>ENVIAR COMANDA</button>
@@ -571,7 +62,7 @@
       <textarea id="productMessageInput" placeholder="Escribe un mensaje para este producto..."></textarea>
       <div class="modal-buttons">
         <button class="save-button" onclick="guardarMensajeProducto()">Guardar</button>
-        <button class="cancel-button" onclick="cerrarModalMensaje()">Cancelar</button>
+        <button class="cancel-button" onclick="cerrarModalMensaje()">Salir</button>
       </div>
     </div>
   </div>
@@ -630,12 +121,47 @@
 
     const subfamiliasAccesoRapido = [
       { codigo: '0401', icono: '➕'}, // ADICIONALES - Ejemplo de acceso rápido
-      { codigo: '0301', icono: '🍊' } // JUGOS - Otro ejemplo de acceso rápido
+      { codigo: '0301', icono: '��' } // JUGOS - Otro ejemplo de acceso rápido
       // Agrega aquí más subfamilias de acceso rápido según sea necesario
     ];
 
     // Nueva estructura de datos para almacenar nombres e iconos de familias/subfamilias dinámicamente
     let categoryNameMap = {}; // { codigo: { nombre: '...', icono: '...', isFamilia: true/false } }
+
+    // Implemento una pila de navegación simple para el botón VOLVER
+    let navigationStack = [];
+
+    function pushNavigation(state) {
+      navigationStack.push(state);
+    }
+
+    function popNavigation() {
+      return navigationStack.pop();
+    }
+
+    function irAVolver() {
+      // Si hay historial, vuelve un paso atrás
+      if (navigationStack.length > 0) {
+        const prevState = popNavigation();
+        if (prevState.type === 'familias') {
+          displayMainCategoriesAndQuickAccess();
+          hideProductPanel();
+        } else if (prevState.type === 'subfamilia') {
+          showSubcategories(prevState.parentCategoryCode);
+          hideProductPanel();
+        } else if (prevState.type === 'productos') {
+          if (prevState.subfamiliaCode) {
+            mostrarProductosPorSubfamilia(prevState.subfamiliaCode);
+          } else if (prevState.familyCode) {
+            displayProductsForFamily(prevState.familyCode);
+          }
+        }
+      } else {
+        // Si no hay historial, muestra la vista principal
+        displayMainCategoriesAndQuickAccess();
+        hideProductPanel();
+      }
+    }
 
     // Función para procesar allProducts y construir categoryNameMap
     function buildCategoryNameMap() {
@@ -753,6 +279,7 @@
 
     // Nueva: Función para mostrar las subcategorías de una familia seleccionada
     function showSubcategories(parentCategoryCode) {
+        pushNavigation({ type: 'familias' });
         console.log("Mostrando subcategorías para la familia:", parentCategoryCode); // DEBUG
         currentParentFamilyCode = parentCategoryCode; // Almacenar el código de la familia padre
         const familiasContainer = document.getElementById('familias');
@@ -799,6 +326,7 @@
 
     // Función para mostrar productos de una familia específica (reutilizada para cuando no hay subfamilias)
     function displayProductsForFamily(familyCode) {
+        pushNavigation({ type: 'familias' });
         console.log("Mostrando productos para la familia:", familyCode); // DEBUG
         currentFamily = familyCode;
         productsGridContainer.innerHTML = ''; // Limpiar solo el contenedor de la cuadrícula
@@ -852,7 +380,8 @@
             productsGridContainer.appendChild(card);
         });
         showProductPanel(); // Mostrar el panel después de cargar los productos
-        ajustarEspacioBotonera();
+        // Refuerzo: volver a aplicar la clase si la botonera está visible
+        setTimeout(ajustarEspacioBotonera, 0);
     }
 
     // Funciones de control de visibilidad del panel de productos
@@ -1072,6 +601,7 @@
 
     // Función para mostrar productos por subfamilia
     function mostrarProductosPorSubfamilia(codigo) {
+      pushNavigation({ type: 'subfamilia', parentCategoryCode: currentParentFamilyCode });
       console.log("Mostrando productos por subfamilia:", codigo); // DEBUG
       productsGridContainer.innerHTML = ''; // Limpiar el contenedor
 
@@ -1116,7 +646,8 @@
         productsGridContainer.appendChild(card);
       });
       showProductPanel(); // Mostrar el panel con los productos de la subfamilia
-      ajustarEspacioBotonera();
+      // Refuerzo: volver a aplicar la clase si la botonera está visible
+      setTimeout(ajustarEspacioBotonera, 0);
     }
 
     function actualizarCantidad(index, delta) {
@@ -1201,10 +732,27 @@
       try {
         // Obtener valores de la URL
         const urlParams = new URLSearchParams(window.location.search);
-        const mesa = urlParams.get('mesa');
-        const garzon = urlParams.get('garzon');
-        const personas = urlParams.get('personas');
-        const horaApertura = urlParams.get('horaApertura');
+        let mesa = urlParams.get('mesa');
+        let garzon = urlParams.get('garzon');
+        let personas = urlParams.get('personas');
+        let horaApertura = urlParams.get('horaApertura');
+
+        // Leer de localStorage si no están en la URL
+        if (!garzon) garzon = localStorage.getItem('garzon_nombre');
+        let idGarzon = localStorage.getItem('garzon_id');
+        if (!personas) personas = localStorage.getItem('personas') || '1';
+        if (!mesa) mesa = localStorage.getItem('mesa');
+        if (!horaApertura) horaApertura = localStorage.getItem('horaApertura');
+
+        // Log de depuración
+        console.log('[DEBUG] Enviando comanda con:', {
+          mesa,
+          garzon,
+          'id-garzon': idGarzon,
+          personas,
+          horaApertura,
+          productos: currentSessionProducts
+        });
 
         // Obtener la hora actual para el nombre de archivo
         const now = new Date();
@@ -1217,6 +765,7 @@
         const dataToSave = {
           mesa: mesa,
           garzon: garzon,
+          'id-garzon': idGarzon,
           personas: personas,
           horaApertura: horaApertura,
           productos: currentSessionProducts,
@@ -1266,7 +815,8 @@
           formattedHoraApertura = `${h}${m}${s}`;
         }
 
-        const content = `/header\n${mesa}\n${garzon}\n${personas}\n${formattedHoraApertura}\n/detalle\n${productsDetailContent}`;
+        const personasFormateado = String(personas).padStart(2, '0');
+        const content = `/header\n${mesa}\n${idGarzon || garzon}\n${personasFormateado}\n${horaApertura}\n/detalle\n${productsDetailContent}`;
 
         // Enviar el archivo TXT
         const transferResponse = await fetch(`${BACKEND_BASE_URL}/enviar-comanda-productos`, {
@@ -1275,6 +825,8 @@
           body: JSON.stringify({
             mesa: mesa,
             garzon: garzon,
+            'id-garzon': idGarzon,
+            personas: personas,
             productos: currentSessionProducts,
             horaApertura: horaApertura,
             timestampedFileName: timestampedFileName,
@@ -1414,6 +966,7 @@
       let currentModIndex = 0;
       let selectedModificadores = [];
       let selectedOption = null;
+      let comentarioManual = '';
 
       const modal = document.getElementById('messageModal');
       const modalTitle = document.getElementById('modalProductName');
@@ -1425,11 +978,8 @@
 
       function showNextModificador() {
         if (currentModIndex >= modificadores.length) {
-          modificadoresContainer.style.display = 'none';
-          productMessageInput.style.display = 'block';
-          modalTitle.innerText = 'Agregar Mensaje';
-          modal.classList.remove('visible');
-          onComplete(selectedModificadores.join(' - '));
+          // Mostrar opción de comentario manual después de los modificadores
+          showComentarioManual();
           return;
         }
 
@@ -1440,6 +990,7 @@
 
         modalTitle.innerText = mod.pregunta;
 
+        // Agregar las opciones rápidas
         mod.opciones.forEach(opcion => {
           const button = document.createElement('button');
           button.className = 'modificador-option';
@@ -1453,6 +1004,57 @@
           modificadoresContainer.appendChild(button);
         });
 
+        // Agregar separador y opción de mensaje manual
+        const separator = document.createElement('div');
+        separator.style.cssText = 'margin: 20px 0 10px 0; border-top: 1px solid #ddd;';
+        modificadoresContainer.appendChild(separator);
+
+        const manualOptionWrapper = document.createElement('div');
+        manualOptionWrapper.style.cssText = 'display: flex; justify-content: center; align-items: center; margin: 0 auto 24px auto;';
+        const manualOption = document.createElement('button');
+        manualOption.className = 'modificador-option';
+        manualOption.style.cssText = 'background: #f8f8f8; border: 2px dashed #999; color: #666; font-style: italic; display: flex; align-items: center; gap: 8px; font-size: 1.1em; box-shadow: none; margin: 0 auto;';
+        manualOption.innerHTML = '<span style="font-size:1.3em;">✏️</span> <span>Escribir mensaje personalizado</span>';
+        manualOption.onclick = () => {
+          // Ocultar opciones rápidas y mostrar textarea
+          modificadoresContainer.innerHTML = `
+            <div style=\"margin-bottom: 20px;\">
+              <h4 style=\"margin-bottom: 10px; color: var(--primary-color); text-align:center;\">Escribir mensaje personalizado</h4>
+              <textarea 
+                id=\"comentarioManualInput\" 
+                placeholder=\"Escriba aquí su mensaje personalizado...\"
+                style=\"width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1em; resize: vertical; min-height: 80px; margin-bottom: 15px;\"
+              ></textarea>
+              <div style=\"display: flex; gap: 10px; justify-content: center;\">
+                <button 
+                  onclick=\"volverAOpcionesRapidas()\" 
+                  style=\"padding: 10px 20px; background: #607D8B; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;\"
+                >
+                  ← Volver a opciones
+                </button>
+              </div>
+            </div>
+          `;
+          // Cambiar comportamiento de los botones
+          saveButton.onclick = () => {
+            const comentarioInput = document.getElementById('comentarioManualInput');
+            comentarioManual = comentarioInput ? comentarioInput.value.trim() : '';
+            if (comentarioManual) {
+              let resultadoFinal = selectedModificadores.join(' - ');
+              resultadoFinal = resultadoFinal ? `${resultadoFinal} | ${comentarioManual}` : comentarioManual;
+              modificadoresContainer.style.display = 'none';
+              productMessageInput.style.display = 'block';
+              modalTitle.innerText = 'Agregar Mensaje';
+              modal.classList.remove('visible');
+              onComplete(resultadoFinal);
+            } else {
+              alert('Por favor, escriba un mensaje o seleccione una opción');
+            }
+          };
+        };
+        manualOptionWrapper.appendChild(manualOption);
+        modificadoresContainer.appendChild(manualOptionWrapper);
+
         saveButton.onclick = () => {
           if (selectedOption) {
             selectedModificadores.push(selectedOption);
@@ -1460,7 +1062,7 @@
             currentModIndex++;
             showNextModificador();
           } else {
-            alert('Por favor, seleccione una opción');
+            alert('Por favor, seleccione una opción o escriba un mensaje personalizado');
           }
         };
 
@@ -1474,6 +1076,75 @@
 
         modal.classList.add('visible');
       }
+
+      function showComentarioManual() {
+        productMessageInput.style.display = 'none';
+        modificadoresContainer.style.display = 'block';
+        modificadoresContainer.innerHTML = `
+          <div style="margin-bottom: 20px;">
+            <h4 style="margin-bottom: 10px; color: var(--primary-color);">¿Desea agregar un comentario personalizado?</h4>
+            <textarea 
+              id="comentarioManualInput" 
+              placeholder="Escriba aquí su comentario personalizado (opcional)..."
+              style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1em; resize: vertical; min-height: 80px; margin-bottom: 15px;"
+            ></textarea>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button 
+                onclick="skipComentarioManual()" 
+                style="padding: 10px 20px; background: #607D8B; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;"
+              >
+                Saltar
+              </button>
+            </div>
+          </div>
+        `;
+
+        modalTitle.innerText = 'Comentario Personalizado';
+        
+        saveButton.onclick = () => {
+          const comentarioInput = document.getElementById('comentarioManualInput');
+          comentarioManual = comentarioInput ? comentarioInput.value.trim() : '';
+          
+          // Combinar modificadores con comentario manual
+          let resultadoFinal = selectedModificadores.join(' - ');
+          if (comentarioManual) {
+            resultadoFinal = resultadoFinal ? `${resultadoFinal} | ${comentarioManual}` : comentarioManual;
+          }
+          
+          modificadoresContainer.style.display = 'none';
+          productMessageInput.style.display = 'block';
+          modalTitle.innerText = 'Agregar Mensaje';
+          modal.classList.remove('visible');
+          onComplete(resultadoFinal);
+        };
+
+        cancelButton.onclick = () => {
+          modificadoresContainer.style.display = 'none';
+          productMessageInput.style.display = 'block';
+          modalTitle.innerText = 'Agregar Mensaje';
+          modal.classList.remove('visible');
+          onComplete(selectedModificadores.join(' - '));
+        };
+
+        modal.classList.add('visible');
+      }
+
+      // Función global para saltar comentario manual
+      window.skipComentarioManual = function() {
+        comentarioManual = '';
+        let resultadoFinal = selectedModificadores.join(' - ');
+        
+        modificadoresContainer.style.display = 'none';
+        productMessageInput.style.display = 'block';
+        modalTitle.innerText = 'Agregar Mensaje';
+        modal.classList.remove('visible');
+        onComplete(resultadoFinal);
+      };
+
+      // Función global para volver a opciones rápidas
+      window.volverAOpcionesRapidas = function() {
+        showNextModificador();
+      };
 
       // Inicializar modal
       modificadoresContainer.style.display = 'block';

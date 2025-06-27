@@ -1,0 +1,14 @@
+{
+  "juan": {
+    "id-garzon": "01",
+    "password": "1",
+    "nombre": "juan",
+    "rol": "garzon"
+  },
+  "pedro": {
+    "id-garzon": "02",
+    "password": "11",
+    "nombre": "pedro",
+    "rol": "garzon"
+  }
+} 

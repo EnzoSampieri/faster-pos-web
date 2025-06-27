@@ -5,7 +5,7 @@
   <title>FASTER POS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="/frontend/css/style.css">
-  <script src="/frontend/config.js"></script>
+  <script src="../config.js"></script>
   <style>
     body {
       display: flex;
@@ -203,7 +203,7 @@
   <h1 class="main-title">Sistema Táctil de Mesas</h1>
 
   <div class="options-grid">
-    <button class="option-button" onclick="location.href='./apertura-mesa.html'">Abrir Mesa</button>
+    <button class="option-button" onclick="location.href='apertura-mesa.html'">Abrir Mesa</button>
     <button class="option-button" onclick="location.href='./mesas-abiertas.html'">Mesas Abiertas</button>
   </div>
 
@@ -245,30 +245,30 @@
     });
 
     async function handleAdminLogin() {
-      const username = adminUsernameInput.value;
+      const codigo = adminUsernameInput.value;
       const password = adminPasswordInput.value;
 
       errorMessageDiv.classList.remove('visible');
 
-      if (!username || !password) {
+      if (!codigo || !password) {
         errorMessageDiv.textContent = "Por favor, ingrese usuario y clave.";
         errorMessageDiv.classList.add('visible');
         return;
       }
 
       try {
-        const response = await fetch(`${BACKEND_BASE_URL}/admin-login`, {
+        const response = await fetch(`${BACKEND_BASE_URL}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ codigo, password })
         });
 
         const data = await response.json();
 
-        if (data.success) {
-          sessionStorage.setItem('adminAuthenticated', 'true'); // Establecer bandera de autenticación
+        if (response.ok && (data.rol === 'admin' || data.rol === 'administrador')) {
+          sessionStorage.setItem('adminAuthenticated', 'true');
           window.location.href = 'gerencia.html';
         } else {
           errorMessageDiv.textContent = data.message || "Credenciales incorrectas.";

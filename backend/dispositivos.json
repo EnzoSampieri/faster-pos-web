@@ -1,0 +1,26 @@
+{
+  "6e:50:e8:64:94:49": {
+    "estado": "autorizado",
+    "ip": "192.168.100.83",
+    "fecha_registro": "2025-06-23T02:34:37.201Z",
+    "ultimo_intento_usuario": "pos1",
+    "ultimo_acceso": "2025-06-26T23:56:01.216Z",
+    "ultimo_usuario": "pos1"
+  },
+  "192.168.100.81": {
+    "estado": "autorizado",
+    "ip": "192.168.100.81",
+    "fecha_registro": "2025-06-23T03:27:55.412Z",
+    "ultimo_intento_usuario": "pos1",
+    "ultimo_acceso": "2025-06-25T04:00:11.055Z",
+    "ultimo_usuario": "pos1"
+  },
+  "fa:b3:cc:ac:19:b4": {
+    "estado": "autorizado",
+    "ip": "192.168.100.89",
+    "fecha_registro": "2025-06-25T02:26:08.203Z",
+    "ultimo_intento_usuario": "pos1",
+    "ultimo_acceso": "2025-06-25T04:17:40.140Z",
+    "ultimo_usuario": "admin"
+  }
+}

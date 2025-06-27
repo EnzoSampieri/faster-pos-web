@@ -1,0 +1,557 @@
+:root {
+  --primary-color: #2196F3;
+  --secondary-color: #4CAF50;
+  --background-color: #f5f5f5;
+  --text-color: #333;
+  --border-color: #ddd;
+  --button-height: 48px;
+  --header-height: 60px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--background-color);
+  color: var(--text-color);
+  height: 100dvh;
+  overflow: hidden; /* Evita el scroll general de la página */
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: var(--header-height);
+  background: var(--primary-color);
+  color: white;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  flex-shrink: 0; /* Asegura que no se encoja */
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: default;
+  padding: 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  margin-top: var(--header-height); /* Compensa el encabezado fijo */
+  height: calc(100dvh - var(--header-height));
+}
+
+.order-section {
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 16px;
+  transition: flex-basis 0.3s, padding-bottom 0.3s;
+  flex: 1; /* Permite que la sección crezca y se encoja */
+  min-height: 0; /* Permite que la sección se encoja si es necesario */
+  box-sizing: border-box;
+  margin-top: 0; /* Eliminado porque el margen ya está en el contenedor principal */
+}
+
+.order-section.revision {
+  flex-grow: 1; /* Asegura que ocupe todo el espacio al revisar */
+  flex-basis: auto;
+  padding-bottom: 0 !important;
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-table th,
+.order-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.product-section {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  position: relative;
+  flex: 0 0 auto; /* No crecerá, su tamaño se basa en el contenido */
+  min-height: 0;
+  max-height: 40vh; /* Limita la altura máxima para dar espacio a la comanda */
+  overflow: visible;
+  justify-content: flex-start;
+  margin-top: 0 !important;
+}
+
+.familias {
+  transition: opacity 0.2s, max-height 0.2s;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  padding: 8px 15px 8px 15px;
+  margin-top: 0 !important;
+  margin-bottom: 0;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 60vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.familias button {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px 10px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  min-height: 80px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.familias button:hover {
+  background-color: #f0f0f0;
+  border-color: var(--primary-color);
+}
+
+.familias button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.familias button i {
+  font-size: 1.5em;
+  margin-bottom: 5px;
+}
+
+/* Nuevo: Estilos para los botones de Acceso Rápido */
+.quick-access-subfamilies .quick-access-button {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px 10px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  min-height: 80px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.quick-access-subfamilies .quick-access-button:hover {
+  background-color: #f0f0f0;
+  border-color: var(--primary-color);
+}
+
+/* Nuevo: Estilos para el panel deslizante de productos */
+.productos {
+  position: fixed; /* Mantener posición fija para el panel */
+  bottom: 20vh; /* Volver a la posición original */
+  left: 0;
+  right: 0;
+  max-height: 60vh; /* Altura máxima para el scroll */
+  transform: translateY(100%); /* Inicialmente oculto fuera de la pantalla */
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out, visibility 0.3s ease-out; /* Animación de deslizamiento, opacidad y visibilidad */
+  z-index: 100000; /* Aumentado drásticamente el z-index para asegurar que siempre esté por encima */
+  background: white;
+  display: none; /* Por defecto no ocupa espacio en el layout */
+  flex-direction: column;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+  opacity: 0; /* Oculto por defecto */
+  pointer-events: none; /* No interactuable por defecto */
+  visibility: hidden; /* Oculto por defecto */
+}
+
+.productos.active {
+  transform: translateY(0); /* Visible en la posición deseada */
+  opacity: 1; /* Visible cuando está activo */
+  pointer-events: auto; /* Interactuable cuando está activo */
+  visibility: visible; /* Visible cuando está activo */
+}
+
+.products-header {
+  padding: 15px;
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0; /* Evita que el encabezado se encoja */
+  display: flex;
+  justify-content: flex-end; /* Alinea el botón a la derecha */
+}
+
+.close-products-button {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.close-products-button:hover {
+  background-color: #1976D2;
+}
+
+.products-grid-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  transition: padding-bottom 0.3s;
+}
+
+.products-grid-container .product-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 120px;
+}
+
+.products-grid-container .product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.products-grid-container .product-name {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--text-color);
+}
+
+.products-grid-container .product-price {
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-top: 5px;
+}
+
+.products-grid-container .product-card.associated {
+  background-color: #e3f2fd;
+  border-color: var(--primary-color);
+}
+
+/* Estilos del Modal de Mensaje */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-overlay.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+  transform: translateY(-20px);
+  transition: transform 0.3s ease-out;
+}
+
+.modal-overlay.visible .modal-content {
+  transform: translateY(0);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+}
+
+.modal-content textarea {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1em;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center; /* Centrar los botones */
+  gap: 16px;
+}
+
+.modal-buttons button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.2s;
+  min-width: 120px;
+}
+
+.modal-buttons .save-button {
+  background-color: #166534; /* Verde oscuro */
+  color: white;
+}
+
+.modal-buttons .save-button:hover {
+  background-color: #14532d;
+}
+
+.modal-buttons .cancel-button {
+  background-color: #f44336; /* Rojo */
+  color: white;
+}
+
+.modal-buttons .cancel-button:hover {
+  background-color: #b71c1c;
+}
+
+/* Estilos para los modificadores */
+.modificador-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.modificador-option {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1em;
+  text-align: left;
+}
+
+.modificador-option:hover {
+  background-color: #f0f0f0;
+  border-color: var(--primary-color);
+}
+
+.modificador-option:active {
+  transform: translateY(1px);
+  background-color: #e0e0e0;
+}
+
+.modificador-option.selected {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Agregar estilos CSS para los productos agregados */
+.producto-agregado {
+  background-color: #f8f9fa;
+}
+.producto-agregado td:first-child {
+  padding-left: 2em;
+}
+.producto-principal {
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.oculto {
+  opacity: 0 !important;
+  max-height: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+.familias.con-botones-flotantes {
+  padding-bottom: 120px !important;
+}
+.products-grid-container.con-botones-flotantes {
+  padding-bottom: 120px !important;
+}
+
+.action-buttons-static {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 0 16px 0;
+  background: white;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  position: relative; /* Volver a relative para que empuje el contenido */
+  z-index: 9999; /* Mantener z-index alto */
+  margin-top: 8px;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0; /* Evitar que se encoja */
+}
+
+.action-button {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  margin: 0 4px;
+  background: #607D8B;
+  position: relative; /* Asegurar posicionamiento */
+  z-index: 1; /* Z-index para el botón individual */
+}
+
+.action-button.update-button,
+.action-button.add-more-button,
+.action-button.family-button-static {
+  background: #607D8B;
+}
+
+.action-button.send-button {
+  background: #388E3C;
+}
+
+.action-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+.quantity-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quantity-button:hover {
+  background: #1976D2;
+  transform: scale(1.08);
+}
+.remove-button {
+  color: #fff;
+  background: #F44336;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.3em;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 6px 12px;
+  margin-left: 4px;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.remove-button:hover {
+  background: #d32f2f;
+  transform: scale(1.08);
+}
+
+/* Estilos específicos para dispositivos móviles */
+@media (max-width: 768px) {
+  .action-buttons-static {
+    padding: 12px 8px; /* Reducir padding en móviles */
+    gap: 6px; /* Reducir gap en móviles */
+    z-index: 99999; /* Z-index aún más alto para móviles */
+  }
+  
+  .action-button {
+    padding: 10px 16px; /* Reducir padding de botones en móviles */
+    font-size: 0.9em; /* Reducir tamaño de fuente en móviles */
+    min-width: auto; /* Permitir que los botones se ajusten */
+    flex: 1; /* Hacer que los botones ocupen el espacio disponible */
+  }
+  
+  .productos {
+    bottom: 15vh; /* Ajustar para móviles */
+  }
+} 

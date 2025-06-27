@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>Abrir Mesa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
-  <link rel="stylesheet" href="/frontend/css/style.css">
+  <script src="../config.js"></script>
+  <link rel="stylesheet" href="../css/style.css">
   <style>
     body {
       background-color: var(--light-gray);
@@ -342,15 +342,14 @@
 
   <div class="container">
     <div class="form-group">
-  <h2 id="etapaLabel" style="font-size:20px;">Ingrese código del garzón</h2>
-  <input type="text" id="inputCampo">
+      <h2 id="etapaLabel" style="font-size:20px;">Ingrese Contraseña del Garzón</h2>
+      <input type="password" id="inputCampo">
       <div id="mensaje" class="mensaje hidden"></div>
 
-  <div class="teclado" id="teclado"></div>
+      <div class="teclado" id="teclado"></div>
 
-  <div class="botones-control">
+      <div class="botones-control">
         <button class="red-button" onclick="borrar()">Borrar</button>
-        <button class="gray-button" onclick="volverAInicio()">Volver al Inicio</button>
         <button class="green-button" onclick="siguienteEtapa()">Siguiente</button>
       </div>
     </div>
@@ -372,30 +371,30 @@
 
   <script>
     let etapa = 0;
-    const datos = { codigo: "", mesa: "", personas: "" };
+    const datos = { password: "", mesa: "", personas: "" };
     const input = document.getElementById("inputCampo");
     const label = document.getElementById("etapaLabel");
     const mensajeDiv = document.getElementById("mensaje");
     const floatingButton = document.getElementById('floatingButton');
     const tablesOverlay = document.getElementById('tablesOverlay');
     const openTablesList = document.getElementById('openTablesList');
+    let garzonCodigo = null;
+    let idGarzonActual = null;
 
     const etapasTexto = [
-      "Ingrese código del garzón",
+      "Ingrese Contraseña del Garzón",
       "Ingrese número de mesa",
       "Ingrese cantidad de personas"
     ];
 
-    const campos = ["codigo", "mesa", "personas"];
+    const campos = ["password", "mesa", "personas"];
 
     function actualizarVista() {
       label.innerText = etapasTexto[etapa];
       input.value = datos[campos[etapa]];
-      mensajeDiv.classList.add('hidden'); // Ocultar mensajes al cambiar de etapa
-      actualizarEstadoBotones(); // Actualizar estado de botones al cambiar de etapa
-
-      // [REMOVIDO] Llamar a la función para actualizar la visibilidad del botón flotante
-      // updateFloatingButtonVisibility();
+      input.type = (etapa === 0) ? 'password' : 'text';
+      mensajeDiv.classList.add('hidden');
+      actualizarEstadoBotones();
     }
 
     async function siguienteEtapa() {
@@ -406,32 +405,57 @@
       }
       datos[campos[etapa]] = valor;
 
-      if (etapa === 0) { // Ingreso de código de garzón
-        localStorage.setItem('garzon', datos.codigo); // Guardar garzón
-        etapa++;
-        actualizarVista();
-        await updateFloatingButtonVisibility(); // [AÑADIDO] Mostrar botón después de confirmar garzón
+      if (etapa === 0) {
+        try {
+          const response = await fetch(`${BACKEND_BASE_URL}/verify-garzon`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: datos.password })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            garzonCodigo = data.nombre;
+            idGarzonActual = data.id_garzon;
+            console.log('[DEBUG] id_garzon recibido del backend:', idGarzonActual);
+            localStorage.setItem("garzon_nombre", garzonCodigo);
+            localStorage.setItem("garzon_id", idGarzonActual);
+            console.log('[DEBUG] Guardado en localStorage:', {
+              garzon_nombre: localStorage.getItem("garzon_nombre"),
+              garzon_id: localStorage.getItem("garzon_id")
+            });
+            etapa++;
+            actualizarVista();
+            await updateFloatingButtonVisibility();
+          } else {
+            const errorData = await response.json();
+            mostrarMensaje(errorData.message || 'Contraseña incorrecta.', 'error');
+            input.value = "";
+            datos.password = "";
+          }
+        } catch (error) {
+          console.error('Error al verificar contraseña:', error);
+          mostrarMensaje('Error de conexión al verificar la contraseña.', 'error');
+        }
+
       } else if (etapa === 1) {
         const mesaId = datos.mesa;
-        const garzonId = datos.codigo;
-
+        const garzonNombre = localStorage.getItem("garzon_nombre");
         try {
           const checkResponse = await fetch(`${BACKEND_BASE_URL}/mesas/${mesaId}`);
           if (checkResponse.ok) {
             const existingMesa = await checkResponse.json();
-            if (existingMesa.garzon !== garzonId) {
+            if (existingMesa.garzon !== garzonNombre) {
               mostrarMensaje(`Mesa ${mesaId} ya está siendo atendida por ${existingMesa.garzon}.`, "error");
               return;
             } else {
-              // Mismo garzón reabriendo la mesa, no pedir personas, ir directo a pedidos
-              window.location.href = `pedidos.html?mesa=${mesaId}&garzon=${garzonId}&personas=${existingMesa.personas || 1}&horaApertura=${existingMesa.horaApertura || ''}`;
+              window.location.href = `pedidos.html?mesa=${mesaId}&garzon=${garzonNombre}&personas=${existingMesa.personas || 1}&horaApertura=${existingMesa.horaApertura || ''}`;
               return;
             }
           } else if (checkResponse.status === 404) {
-            // Mesa no existe (es nueva), avanzar a la etapa de pedir cantidad de personas
-        etapa++;
-        actualizarVista();
-      } else {
+            etapa++;
+            actualizarVista();
+          } else {
             const errorData = await checkResponse.json();
             throw new Error(errorData.error || 'Error desconocido al verificar mesa existente.');
           }
@@ -445,18 +469,26 @@
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const horaApertura = `${hours}:${minutes}`;
-
-        // Primero, intentar registrar/bloquear la mesa en el backend
+        const garzonNombre = localStorage.getItem("garzon_nombre");
+        const garzonId = localStorage.getItem("garzon_id");
+        console.log('[DEBUG] Antes de POST /mesas y /iniciar-comanda-txt:', {
+          mesa: datos.mesa,
+          garzon: garzonNombre,
+          'id-garzon': garzonId,
+          personas: datos.personas,
+          horaApertura: horaApertura
+        });
         try {
           const saveMesaResponse = await fetch(`${BACKEND_BASE_URL}/mesas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               mesa: datos.mesa,
-              garzon: datos.codigo,
+              garzon: garzonNombre,
+              'id-garzon': garzonId,
               personas: datos.personas,
               horaApertura: horaApertura,
-              productos: [] // Inicialmente, sin productos al abrir la mesa
+              productos: []
             })
           });
 
@@ -464,21 +496,20 @@
             const errorData = await saveMesaResponse.json();
             if (saveMesaResponse.status === 403) {
               mostrarMensaje(`Error: ${errorData.error}`, 'error');
-              return; // Bloquear si la mesa ya está tomada por otro garzón
+              return;
             }
             throw new Error(errorData.error || 'Error desconocido al registrar la mesa.');
           }
-
-          // Si el registro de la mesa fue exitoso, entonces proceder a iniciar la comanda TXT
-          // Llamar al nuevo endpoint para iniciar el archivo TXT de la comanda
+          
           const iniciarComandaTxtResponse = await fetch(`${BACKEND_BASE_URL}/iniciar-comanda-txt`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ // Asegúrate de que horaApertura se pasa correctamente
+            body: JSON.stringify({
               mesa: datos.mesa,
-              garzon: datos.codigo,
+              garzon: garzonNombre,
+              'id-garzon': garzonId,
               personas: datos.personas,
-              horaApertura: horaApertura // Enviar la hora de apertura al backend
+              horaApertura: horaApertura
             })
           });
 
@@ -488,8 +519,7 @@
           }
           const txtMessage = (await iniciarComandaTxtResponse.json()).message;
           console.log(txtMessage);
-          // Redirigir solo si la creación del TXT fue exitosa
-          window.location.href = `pedidos.html?mesa=${datos.mesa}&garzon=${datos.codigo}&personas=${datos.personas}&horaApertura=${horaApertura}`;
+          window.location.href = `pedidos.html?mesa=${datos.mesa}&garzon=${garzonNombre}&personas=${datos.personas}&horaApertura=${horaApertura}`;
 
         } catch (error) {
           mostrarMensaje(`Error: ${error.message}`, 'error');
@@ -497,26 +527,24 @@
         }
         return;
       }
-      actualizarEstadoBotones(); // Asegurarse de que el estado se actualice después de cada etapa
+      actualizarEstadoBotones();
     }
 
     function borrar() {
       input.value = "";
-      mensajeDiv.classList.add('hidden'); // Ocultar mensaje al borrar
-      if (etapa === 0) { // Si estamos en la etapa de garzón
-        floatingButton.classList.add('hidden'); // Asegurar que el botón se oculta si se borra el garzón
+      datos[campos[etapa]] = "";
+      mensajeDiv.classList.add('hidden');
+      if (etapa === 0) {
+        floatingButton.classList.add('hidden');
         closeTablesOverlay();
       }
     }
 
     function volverAInicio() {
-      // Resetear los datos para asegurar un estado limpio
-      datos.codigo = "";
+      datos.password = "";
       datos.mesa = "";
       datos.personas = "";
-      etapa = 0; // Volver a la etapa inicial
-
-      // Redirigir a la página de inicio
+      etapa = 0;
       window.location.href = 'inicio.html';
     }
 
@@ -530,7 +558,7 @@
       const headerBackButton = document.querySelector('.header-section .back-button');
       const controlBackButton = document.querySelector('.botones-control .gray-button');
 
-      if (etapa > 0) { // Si ya se ingresó el garzón, deshabilitar los botones de volver
+      if (etapa > 0) {
         if (headerBackButton) {
           headerBackButton.disabled = true;
           headerBackButton.style.opacity = '0.5';
@@ -562,29 +590,27 @@
         const btn = document.createElement("button");
         btn.textContent = tecla;
         btn.onclick = () => {
-          console.log(`Tecla presionada: ${tecla}`); // Debug: Log al presionar la tecla
+          console.log(`Tecla presionada: ${tecla}`);
           if (tecla === '←') {
             input.value = input.value.slice(0, -1);
           } else {
             input.value += tecla;
           }
-          // Actualizar el valor en el objeto 'datos' para que se persista
           datos[campos[etapa]] = input.value;
-          console.log(`Valor del input actualizado: ${input.value}`); // Debug: Log del valor del input
+          console.log(`Valor del input actualizado: ${input.value}`);
           actualizarVista();
         };
         cont.appendChild(btn);
       });
     }
 
-    // Nuevo: Funciones para el overlay de mesas abiertas
     async function openTablesOverlay() {
-      if (!datos.codigo) {
-        mostrarMensaje("Ingrese primero su código de garzón.", "error");
+      if (!garzonCodigo) {
+        mostrarMensaje("No se pudo obtener el código del garzón. Vuelva a iniciar sesión.", "error");
         return;
       }
       openTablesList.innerHTML = '<div class="empty-tables-message">Cargando mesas...</div>';
-      tablesOverlay.classList.add('show'); // Mostrar el overlay con la clase 'show'
+      tablesOverlay.classList.add('show');
 
       try {
         const response = await fetch(`${BACKEND_BASE_URL}/mesas`);
@@ -592,7 +618,7 @@
           throw new Error('Error al cargar las mesas abiertas.');
         }
         const allMesas = await response.json();
-        const garzonMesas = Object.values(allMesas).filter(mesa => mesa.garzon === datos.codigo);
+        const garzonMesas = Object.values(allMesas).filter(mesa => mesa.garzon === garzonCodigo);
 
         openTablesList.innerHTML = '';
         if (garzonMesas.length === 0) {
@@ -602,7 +628,6 @@
           garzonMesas.forEach(mesa => {
             const item = document.createElement('div');
             item.className = 'open-table-item';
-            // Mostrar número de mesa y cantidad de personas si está disponible
             item.innerText = `Mesa ${mesa.mesa}` + (mesa.personas ? ` (${mesa.personas} pers)` : '');
             item.onclick = () => goToPedidos(mesa);
             openTablesList.appendChild(item);
@@ -615,18 +640,16 @@
     }
 
     function closeTablesOverlay() {
-      tablesOverlay.classList.remove('show'); // Ocultar el overlay removiendo la clase 'show'
+      tablesOverlay.classList.remove('show');
     }
 
     function goToPedidos(mesaData) {
-      // Redirigir a pedidos.html pasando los datos de la mesa
       window.location.href = `pedidos.html?mesa=${mesaData.mesa}&garzon=${mesaData.garzon}&personas=${mesaData.personas || 1}&horaApertura=${mesaData.horaApertura || ''}`;
     }
 
-    // Nueva función para controlar la visibilidad del botón flotante y cargar mesas
     async function updateFloatingButtonVisibility() {
-      console.log(`[updateFloatingButtonVisibility] Ejecutando para garzón: ${datos.codigo}`);
-      if (!datos.codigo) {
+      console.log(`[updateFloatingButtonVisibility] Ejecutando para garzón: ${garzonCodigo}`);
+      if (!garzonCodigo) {
         floatingButton.classList.add('hidden');
         closeTablesOverlay();
         console.log(`[updateFloatingButtonVisibility] Garzón no definido, ocultando botón.`);
@@ -639,22 +662,22 @@
           throw new Error('Error al cargar las mesas abiertas para verificar el botón.');
         }
         const allMesas = await response.json();
-        const garzonMesas = Object.values(allMesas).filter(mesa => mesa.garzon === datos.codigo);
+        const garzonMesas = Object.values(allMesas).filter(mesa => mesa.garzon === garzonCodigo);
 
         if (garzonMesas.length > 0) {
           floatingButton.classList.remove('hidden');
           floatingButton.style.display = 'flex';
-          floatingButton.style.border = ''; // Limpiar estilos de depuración
-          floatingButton.style.background = ''; // Limpiar estilos de depuración
-          console.log(`[updateFloatingButtonVisibility] Garzón ${datos.codigo} tiene mesas abiertas, mostrando botón.`);
+          floatingButton.style.border = '';
+          floatingButton.style.background = '';
+          console.log(`[updateFloatingButtonVisibility] Garzón ${garzonCodigo} tiene mesas abiertas, mostrando botón.`);
           console.log(`[updateFloatingButtonVisibility] floatingButton.style.display: ${floatingButton.style.display}`);
         } else {
           floatingButton.classList.add('hidden');
           floatingButton.style.display = 'none';
-          floatingButton.style.border = ''; // Limpiar estilos de depuración
-          floatingButton.style.background = ''; // Limpiar estilos de depuración
+          floatingButton.style.border = '';
+          floatingButton.style.background = '';
           closeTablesOverlay();
-          console.log(`[updateFloatingButtonVisibility] Garzón ${datos.codigo} NO tiene mesas abiertas, ocultando botón.`);
+          console.log(`[updateFloatingButtonVisibility] Garzón ${garzonCodigo} NO tiene mesas abiertas, ocultando botón.`);
           console.log(`[updateFloatingButtonVisibility] floatingButton.style.display: ${floatingButton.style.display}`);
         }
       } catch (error) {
@@ -665,20 +688,10 @@
       }
     }
 
-    // Cargar garzón guardado al inicio
-    // const garzonGuardado = localStorage.getItem('garzon');
-    // if (garzonGuardado) {
-    //   datos.codigo = garzonGuardado;
-    //   input.value = garzonGuardado;
-    //   etapa = 1; // Si hay garzón, saltar a pedir mesa
-    //   actualizarVista();
-    // } else {
-    //   actualizarVista();
-    // }
-
-    actualizarVista(); // Iniciar siempre pidiendo el garzón
-    agregarTeclado();
-    // actualizarEstadoBotones(); // Ya se llama dentro de actualizarVista
+    document.addEventListener('DOMContentLoaded', () => {
+      actualizarVista();
+      agregarTeclado();
+    });
   </script>
 </body>
 </html>

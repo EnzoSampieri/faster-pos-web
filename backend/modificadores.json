@@ -13,10 +13,11 @@
   {
     "tipo": "subfamilia",
     "codigo": "0102",
-    "pregunta": "¿Desea queso?",
+    "pregunta": "¿Desea Agregar un Comentario?",
     "opciones": [
       "SIN PEPINILLOS",
-      "SIN QUESO"
-    ]
+      "SIN QUESO",
+      "SIN MAYO"
+    ] 
   }
 ]

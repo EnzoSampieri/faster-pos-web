@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cuenta Mesa 3</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    h1, h2, h3 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+    .total { font-weight: bold; text-align: right; }
+    .footer { text-align: center; margin-top: 40px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>{{nombre_restaurante}}</h1>
+  <h3>Hora: {{hora}}</h3>
+  <h3>Garzón: 08</h3>
+
+  <h2>Detalle del consumo</h2>
+  <table>
+    <tr><th>Producto</th><th>Cant.</th><th>Precio</th></tr>
+    {{detalle_productos}}
+  </table>
+
+  <p class="total">Total consumido: {{total_consumido}}</p>
+  <p class="total">Descuento: {{descuento}}</p>
+  <p class="total">Propina sugerida (10%): {{propina}}</p>
+  <p class="total">Total a pagar: {{total_final}}</p>
+
+  <div class="footer">
+    Síguenos en nuestras redes sociales: @fasterpos
+  </div>
+</body>
+</html>

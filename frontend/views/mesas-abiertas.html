@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Mesas Abiertas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="/frontend/config.js"></script>
+  <script src="../config.js"></script>
+  <script src="qrcode.min.js"></script>
   <style>
     :root {
       --primary-color: #2196F3;
@@ -15,6 +16,9 @@
       --button-height: 48px;
       --header-height: 60px;
       --shadow-color: rgba(0,0,0,0.1);
+      --timeout-cierre-mesa: 3000; /* 3 segundos - MODIFICAR AQUÍ */
+      --timeout-polling: 3000; /* 60 segundos - MODIFICAR AQUÍ */
+      --intervalo-polling: 1000; /* 1 segundo - MODIFICAR AQUÍ */
     }
 
     * {
@@ -216,7 +220,7 @@
 
     .nav-btns button:nth-child(1) { background: #607D8B; } /* Volver */
     .nav-btns button:nth-child(2) { background: var(--primary-color); } /* Inicio */
-    #emitirCuentaBtn { background: #F44336; }
+    #emitirCuentaBtn { background: #607D8B; }
     #cerrarMesaBtn { background: #607D8B; }
 
     /* Responsive adjustments */
@@ -256,6 +260,108 @@
         flex-direction: column;
       }
     }
+
+    /* Modal emergente para confirmaciones - Compatible con WebView Android */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px;
+      max-width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .modal-message {
+      font-size: 1.1em;
+      color: var(--text-color);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 100px;
+    }
+
+    .modal-btn.confirm {
+      background: #F44336;
+      color: white;
+    }
+
+    .modal-btn.cancel {
+      background: #607D8B;
+      color: white;
+    }
+
+    .modal-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    /* Para WebView Android - asegurar que el modal esté siempre visible */
+    @media (max-width: 480px) {
+      .modal-content {
+        margin: 10px;
+        padding: 20px;
+        max-width: 95%;
+      }
+      
+      .modal-title {
+        font-size: 1.3em;
+      }
+      
+      .modal-message {
+        font-size: 1em;
+      }
+      
+      .modal-buttons {
+        flex-direction: column;
+      }
+      
+      .modal-btn {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -276,6 +382,20 @@
   
   <div id="table-detail"></div>
 
+  <!-- Modal para QR e impresión de cuenta -->
+  <div id="cuentaModalOverlay" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-title" id="cuentaModalTitle">Cuenta</div>
+      <div class="modal-message" id="cuentaModalMsg"></div>
+      <div id="qrContainer" style="display:none; justify-content:center; align-items:center; margin: 20px 0;"></div>
+      <div class="modal-buttons" id="cuentaModalBtns">
+        <button class="modal-btn" id="btnMostrarQR" style="background:#2196F3; color:white;">Mostrar QR</button>
+        <button class="modal-btn" id="btnImprimirCuenta" style="background:#388E3C; color:white;">Imprimir cuenta</button>
+        <button class="modal-btn cancel" id="btnCerrarCuentaModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let tables = [];
     const overviewContainer = document.getElementById('table-overview-container');
@@ -283,8 +403,399 @@
     const detailDiv = document.getElementById('table-detail');
     const mesaSearchInput = document.getElementById('mesaSearchInput');
 
+    // Función para mostrar modal emergente compatible con WebView Android
+    function showModal(title, message, onConfirm, onCancel) {
+      // Remover modal existente si hay uno
+      const existingModal = document.querySelector('.modal-overlay');
+      if (existingModal) {
+        existingModal.remove();
+      }
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-title">${title}</div>
+          <div class="modal-message">${message}</div>
+          <div class="modal-buttons">
+            <button class="modal-btn confirm">Confirmar</button>
+            <button class="modal-btn cancel">Cancelar</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      // Event listeners para los botones
+      const confirmBtn = modal.querySelector('.modal-btn.confirm');
+      const cancelBtn = modal.querySelector('.modal-btn.cancel');
+
+      confirmBtn.addEventListener('click', () => {
+        modal.remove();
+        if (onConfirm) onConfirm();
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        modal.remove();
+        if (onCancel) onCancel();
+      });
+
+      // Cerrar modal al hacer clic fuera de él
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+          if (onCancel) onCancel();
+        }
+      });
+
+      // Prevenir scroll del body cuando el modal está abierto
+      document.body.style.overflow = 'hidden';
+
+      // Restaurar scroll cuando se cierra el modal
+      const restoreScroll = () => {
+        document.body.style.overflow = '';
+      };
+
+      confirmBtn.addEventListener('click', restoreScroll);
+      cancelBtn.addEventListener('click', restoreScroll);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) restoreScroll();
+      });
+    }
+
+    // Función para cerrar mesa con modal
+    async function cerrarMesaConModal(table) {
+      showModal(
+        'Cerrar Mesa',
+        `¿Estás seguro de cerrar la Mesa ${table.mesa}?<br><br>Esta acción enviará la solicitud de cierre al sistema.`,
+        async () => {
+          // Función que se ejecuta al confirmar
+          await procesarCierreMesa(table);
+        },
+        () => {
+          // Función que se ejecuta al cancelar
+          console.log('Cierre de mesa cancelado por el usuario');
+        }
+      );
+    }
+
+    // Función principal para procesar el cierre de mesa
+    async function procesarCierreMesa(table) {
+      try {
+        console.log('🚀 [Frontend Debug] Iniciando proceso de cierre de mesa');
+        console.log('📋 [Frontend Debug] Datos de la mesa:', {
+          mesa: table.mesa,
+          "id-garzon": table["id-garzon"],
+          personas: table.personas,
+          horaApertura: table.horaApertura,
+          productos: table.productos?.length || 0
+        });
+
+        // Obtener el botón de cerrar
+        const btnCerrar = document.getElementById('cerrarMesaBtn');
+        if (!btnCerrar) {
+          throw new Error('Botón de cerrar mesa no encontrado');
+        }
+
+        // Deshabilitar botón y mostrar estado inicial
+        btnCerrar.disabled = true;
+        btnCerrar.textContent = 'Enviando archivo...';
+        
+        // Paso 1: Enviar archivo .txt con estructura /header y /estado
+        console.log('📤 [Frontend Debug] Enviando solicitud de cierre al backend...');
+        
+        // Crear un timeout usando las variables CSS
+        const timeoutMs = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--timeout-cierre-mesa')) || 3000;
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout: No se recibió respuesta en ' + (timeoutMs/1000) + ' segundos')), timeoutMs);
+        });
+        
+        const cerrarPromise = fetch(`${BACKEND_BASE_URL}/cerrar-mesa`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mesa: table.mesa,
+            "id-garzon": table["id-garzon"],
+            personas: table.personas,
+            horaApertura: table.horaApertura
+          })
+        });
+
+        // Ejecutar la solicitud con timeout
+        const cerrarResponse = await Promise.race([cerrarPromise, timeoutPromise]);
+
+        console.log('📥 [Frontend Debug] Respuesta del backend recibida:', {
+          status: cerrarResponse.status,
+          ok: cerrarResponse.ok
+        });
+
+        if (!cerrarResponse.ok) {
+          const errorData = await cerrarResponse.json();
+          console.error('❌ [Frontend Debug] Error en respuesta del backend:', errorData);
+          throw new Error(errorData.error || 'Error al enviar archivo de cierre');
+        }
+
+        const cerrarData = await cerrarResponse.json();
+        console.log('✅ [Frontend Debug] Archivo de cierre enviado exitosamente:', cerrarData);
+
+        // Paso 2: Mostrar mensaje de espera
+        btnCerrar.textContent = '⏳ Esperando confirmación del Linux...';
+        document.getElementById('msgCuenta').textContent = '⏳ Esperando confirmación del Linux...';
+        document.getElementById('msgCuenta').style.color = '#FF9800';
+
+        // Paso 3: Consultar periódicamente el estado del Linux hasta recibir confirmación
+        let intentos = 0;
+        const maxIntentos = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--timeout-polling')) / 
+                           parseInt(getComputedStyle(document.documentElement).getPropertyValue('--intervalo-polling')) || 60;
+        const intervaloMs = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--intervalo-polling')) || 1000;
+        
+        const consultarEstadoLinux = async () => {
+          try {
+            console.log(`🔍 [Frontend Debug] Consultando estado del Linux para mesa ${table.mesa} (intento ${intentos + 1}/${maxIntentos})`);
+            
+            const estadoLinuxResponse = await fetch(`${BACKEND_BASE_URL}/estado-linux/${table.mesa}`, { cache: 'no-store' });
+            console.log('📥 [Frontend Debug] Respuesta de consulta de estado del Linux:', {
+              status: estadoLinuxResponse.status,
+              ok: estadoLinuxResponse.ok
+            });
+
+            if (!estadoLinuxResponse.ok) {
+              throw new Error('Error al consultar estado del Linux');
+            }
+
+            const estadoLinuxData = await estadoLinuxResponse.json();
+            console.log(`📋 [Frontend Debug] Estado del Linux para mesa ${table.mesa}:`, estadoLinuxData);
+
+            if (estadoLinuxData.estado && ["pagada", "pagado", "cerrada", "cerrado"].includes(estadoLinuxData.estado)) {
+              // ✅ Linux confirma pago/cierre - proceder a cerrar mesa
+              console.log('✅ [Frontend Debug] Linux confirma pago/cierre - procediendo a cerrar mesa');
+              
+              btnCerrar.textContent = '✅ Mesa cerrada con éxito';
+              btnCerrar.style.background = '#4CAF50';
+              document.getElementById('msgCuenta').textContent = '✅ Mesa cerrada con éxito (confirmado por Linux)';
+              document.getElementById('msgCuenta').style.color = '#4CAF50';
+              
+              // Eliminar la mesa del sistema
+              console.log('🗑️ [Frontend Debug] Eliminando mesa del sistema...');
+              const deleteResponse = await fetch(`${BACKEND_BASE_URL}/mesas/${table.mesa}`, {
+                method: 'DELETE'
+              });
+              
+              if (deleteResponse.ok) {
+                console.log('✅ [Frontend Debug] Mesa eliminada del sistema exitosamente');
+              } else {
+                console.warn('⚠️ [Frontend Debug] Error al eliminar mesa del sistema');
+              }
+              
+              // Limpiar archivo de estado del Linux
+              try {
+                const limpiarEstadoResponse = await fetch(`${BACKEND_BASE_URL}/limpiar-estado-linux/${table.mesa}`, {
+                  method: 'DELETE'
+                });
+                if (limpiarEstadoResponse.ok) {
+                  console.log('🧹 [Frontend Debug] Archivo de estado del Linux limpiado');
+                }
+              } catch (e) {
+                console.warn('⚠️ [Frontend Debug] No se pudo limpiar archivo de estado del Linux');
+              }
+              
+              // Volver a la vista general después de 1 segundo
+              setTimeout(() => {
+                console.log('🔄 [Frontend Debug] Volviendo a la vista general...');
+                fetchMesasAbiertas();
+                detailDiv.style.display = 'none';
+                overviewContainer.style.display = 'flex';
+              }, 1000);
+              
+              return; // Salir del polling
+            } else if (estadoLinuxData.estado && ["abierta", "abierto"].includes(estadoLinuxData.estado)) {
+              // 🕓 Linux indica que la mesa sigue abierta
+              console.log('🕓 [Frontend Debug] Linux indica que la mesa sigue abierta');
+              btnCerrar.textContent = '🕓 Mesa aún abierta (Linux)';
+              btnCerrar.style.background = '#FF9800';
+              document.getElementById('msgCuenta').textContent = '🕓 Linux indica que la mesa sigue abierta';
+              document.getElementById('msgCuenta').style.color = '#FF9800';
+              
+              // Continuar consultando
+              intentos++;
+              if (intentos >= maxIntentos) {
+                console.log('⏰ [Frontend Debug] Timeout alcanzado - Linux no confirma cierre');
+                btnCerrar.textContent = '❌ Mesa Abierta - Reintentar';
+                btnCerrar.disabled = false;
+                btnCerrar.style.background = '#F44336';
+                document.getElementById('msgCuenta').textContent = '❌ Timeout: Mesa Abierta - Reintentar en ' + (maxIntentos * intervaloMs / 1000) + ' segundos';
+                document.getElementById('msgCuenta').style.color = '#F44336';
+                return;
+              }
+              
+              setTimeout(consultarEstadoLinux, intervaloMs);
+            } else {
+              // ⏳ Linux aún no ha respondido
+              console.log('⏳ [Frontend Debug] Linux aún no ha enviado estado');
+              intentos++;
+              if (intentos >= maxIntentos) {
+                console.log('⏰ [Frontend Debug] Timeout alcanzado - Linux no respondió');
+                btnCerrar.textContent = '❌ Timeout - Reintentar';
+                btnCerrar.disabled = false;
+                btnCerrar.style.background = '#F44336';
+                document.getElementById('msgCuenta').textContent = '❌ Timeout: Linux no respondió en ' + (maxIntentos * intervaloMs / 1000) + ' segundos';
+                document.getElementById('msgCuenta').style.color = '#F44336';
+                return;
+              }
+              
+              setTimeout(consultarEstadoLinux, intervaloMs);
+            }
+          } catch (error) {
+            console.error('❌ [Frontend Debug] Error al consultar estado del Linux:', error);
+            intentos++;
+            if (intentos >= maxIntentos) {
+              console.log('⏰ [Frontend Debug] Timeout alcanzado por errores');
+              btnCerrar.textContent = '❌ Error - Reintentar';
+              btnCerrar.disabled = false;
+              btnCerrar.style.background = '#F44336';
+              document.getElementById('msgCuenta').textContent = '❌ Error al consultar estado del Linux';
+              document.getElementById('msgCuenta').style.color = '#F44336';
+              return;
+            }
+            
+            // Continuar consultando en el intervalo configurado
+            setTimeout(consultarEstadoLinux, intervaloMs);
+          }
+        };
+
+        // Iniciar el polling del estado del Linux
+        console.log('🔄 [Frontend Debug] Iniciando polling del estado del Linux...');
+        setTimeout(consultarEstadoLinux, intervaloMs);
+
+      } catch (error) {
+        console.error('❌ [Frontend Debug] Error al cerrar mesa:', error);
+        
+        const btnCerrar = document.getElementById('cerrarMesaBtn');
+        if (!btnCerrar) return;
+        
+        if (error.message.includes('Timeout')) {
+          // Timeout en la solicitud inicial
+          btnCerrar.textContent = '⏰ Timeout - Reintentar';
+          btnCerrar.disabled = false;
+          btnCerrar.style.background = '#FF9800';
+          document.getElementById('msgCuenta').textContent = '⏰ Timeout: No se recibió respuesta en ' + (timeoutMs/1000) + ' segundos. Revisa los logs.';
+          document.getElementById('msgCuenta').style.color = '#FF9800';
+          
+          // Agregar botón de consultar logs
+          const logButton = document.createElement('button');
+          logButton.textContent = '📋 Consultar Logs';
+          logButton.style.cssText = `
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+          `;
+          logButton.onclick = async () => {
+            try {
+              logButton.textContent = '📋 Consultando...';
+              logButton.disabled = true;
+              
+              const logsResponse = await fetch(`${BACKEND_BASE_URL}/logs-cierre-mesa/${table.mesa}`);
+              if (logsResponse.ok) {
+                const logsData = await logsResponse.json();
+                showModal(
+                  'Logs de Cierre de Mesa',
+                  `<pre style="text-align: left; font-size: 0.8em; max-height: 300px; overflow-y: auto;">${logsData.logs}</pre>`,
+                  () => {}, // No hacer nada al confirmar
+                  () => {}  // No hacer nada al cancelar
+                );
+              } else {
+                showModal(
+                  'Error',
+                  '❌ No se pudieron obtener los logs',
+                  () => {}, // No hacer nada al confirmar
+                  () => {}  // No hacer nada al cancelar
+                );
+              }
+            } catch (logError) {
+              showModal(
+                'Error',
+                '❌ Error al consultar logs: ' + logError.message,
+                () => {}, // No hacer nada al confirmar
+                () => {}  // No hacer nada al cancelar
+              );
+            } finally {
+              logButton.textContent = '📋 Consultar Logs';
+              logButton.disabled = false;
+            }
+          };
+          
+          // Agregar botón de consultar logs de curl entrante
+          const curlLogButton = document.createElement('button');
+          curlLogButton.textContent = '🔍 Logs CURL Entrante';
+          curlLogButton.style.cssText = `
+            background: #9C27B0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            margin-top: 10px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+          `;
+          curlLogButton.onclick = async () => {
+            try {
+              curlLogButton.textContent = '🔍 Consultando...';
+              curlLogButton.disabled = true;
+              
+              const curlLogsResponse = await fetch(`${BACKEND_BASE_URL}/logs-curl-entrante/${table.mesa}`);
+              if (curlLogsResponse.ok) {
+                const curlLogsData = await curlLogsResponse.json();
+                showModal(
+                  'Logs de CURL Entrante - Mesa ' + table.mesa,
+                  `<pre style="text-align: left; font-size: 0.8em; max-height: 400px; overflow-y: auto;">${curlLogsData.logs}</pre>`,
+                  () => {}, // No hacer nada al confirmar
+                  () => {}  // No hacer nada al cancelar
+                );
+              } else {
+                showModal(
+                  'Error',
+                  '❌ No se pudieron obtener los logs de CURL',
+                  () => {}, // No hacer nada al confirmar
+                  () => {}  // No hacer nada al cancelar
+                );
+              }
+            } catch (curlLogError) {
+              showModal(
+                'Error',
+                '❌ Error al consultar logs de CURL: ' + curlLogError.message,
+                () => {}, // No hacer nada al confirmar
+                () => {}  // No hacer nada al cancelar
+              );
+            } finally {
+              curlLogButton.textContent = '🔍 Logs CURL Entrante';
+              curlLogButton.disabled = false;
+            }
+          };
+          
+          // Insertar los botones después del mensaje
+          const msgDiv = document.getElementById('msgCuenta');
+          msgDiv.appendChild(document.createElement('br'));
+          msgDiv.appendChild(logButton);
+          msgDiv.appendChild(curlLogButton);
+        } else {
+          // Otro tipo de error
+          btnCerrar.textContent = '❌ Error - Reintentar';
+          btnCerrar.disabled = false;
+          btnCerrar.style.background = '#F44336';
+          document.getElementById('msgCuenta').textContent = '❌ Error al cerrar la mesa: ' + error.message;
+          document.getElementById('msgCuenta').style.color = '#F44336';
+        }
+      }
+    }
+
     function fetchMesasAbiertas() {
-      fetch(`${BACKEND_BASE_URL}/mesas`)
+      fetch(`${BACKEND_BASE_URL}/mesas`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           tables = Object.values(data);
@@ -353,69 +864,50 @@
         ` : '<div style="color:#888; text-align: center;">Sin productos en la comanda.</div>'}
         <div style="margin-top:10px; text-align: right;"><span class="detail-label">Total:</span> <span class="detail-value" id="totalMesa">$${total}</span></div>
         <div class="nav-btns">
-          <button onclick="window.fetchMesasAbiertas()">Volver</button>
-          <button onclick="window.goHome()">Inicio</button>
           <button id="emitirCuentaBtn">EMITIR CUENTA</button>
           <button id="cerrarMesaBtn">Cerrar Mesa</button>
         </div>
         <div id="msgCuenta" style="margin-top:10px;color:#4CAF50; text-align: center;"></div>
       `;
 
-      // Lógica del botón EMITE CUENTA (adaptada)
+      // Lógica del botón EMITIR CUENTA (adaptada)
       const btnEmitir = document.getElementById('emitirCuentaBtn');
       if (btnEmitir) {
-        // Deshabilitar si la cuenta ya fue emitida
         if (cuentaEmitida) {
           btnEmitir.disabled = true;
           btnEmitir.textContent = 'Cuenta Solicitada';
           btnEmitir.style.background = '#ccc';
         }
-
-        btnEmitir.onclick = function() {
+        btnEmitir.onclick = async function() {
           btnEmitir.disabled = true;
           btnEmitir.textContent = 'Enviando...';
-          fetch(`${BACKEND_BASE_URL}/emitir-cuenta`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mesa: table.mesa, garzon: table.garzon, personas: table.personas, horaApertura: table.horaApertura })
-          })
-          .then(res => res.json())
-          .then(resp => {
-            document.getElementById('msgCuenta').textContent = resp.ok ? 'Cuenta emitida y enviada correctamente.' : 'Error al emitir cuenta.';
+          try {
+            const resp = await fetch(`${BACKEND_BASE_URL}/emitir-cuenta`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mesa: table.mesa })
+            });
+            const data = await resp.json();
+            if (!data.success || !data.url) throw new Error('No se pudo generar la cuenta');
+            // Generar la URL del PDF en vez del HTML
+            const pdfUrl = data.url.replace(/\/cuentas\/mesa-(\d+)\.html$/, '/cuenta-pdf/$1');
+            mostrarModalCuenta(pdfUrl, table);
             btnEmitir.textContent = 'Cuenta Emitida';
-            btnEmitir.disabled = true;
+            btnEmitir.disabled = false;
             btnEmitir.style.background = '#ccc';
-          })
-          .catch(() => {
+          } catch (e) {
             document.getElementById('msgCuenta').textContent = 'Error al emitir cuenta.';
             btnEmitir.textContent = 'EMITIR CUENTA';
             btnEmitir.disabled = false;
-          });
+          }
         };
       }
 
       // Lógica del botón Cerrar Mesa
       const btnCerrar = document.getElementById('cerrarMesaBtn');
       if (btnCerrar) {
-        btnCerrar.onclick = function() {
-          if (confirm(`¿Estás seguro de cerrar la Mesa ${table.mesa}? Esta acción la eliminará del sistema.`)) {
-            fetch(`${BACKEND_BASE_URL}/mesas/${table.mesa}`, {
-              method: 'DELETE'
-            })
-            .then(res => {
-              if (!res.ok) {
-                return res.json().then(errorData => {
-                  throw new Error(errorData.error || 'Error desconocido al cerrar la mesa');
-                });
-              }
-              alert(`Mesa ${table.mesa} cerrada y eliminada correctamente.`);
-              fetchMesasAbiertas(); // Vuelve a cargar las mesas para reflejar el cambio
-            })
-            .catch(err => {
-              alert('No se pudo cerrar la mesa: ' + err.message);
-              console.error('Error al cerrar la mesa:', err);
-            });
-          }
+        btnCerrar.onclick = async function() {
+          await cerrarMesaConModal(table);
         };
       }
     }
@@ -436,6 +928,78 @@
     window.goHome = function() {
       window.location.href = 'inicio.html';
     };
+
+    // --- Modal QR/Imprimir cuenta ---
+    function mostrarModalCuenta(urlCuenta, table) {
+      const overlay = document.getElementById('cuentaModalOverlay');
+      const title = document.getElementById('cuentaModalTitle');
+      const msg = document.getElementById('cuentaModalMsg');
+      const qrDiv = document.getElementById('qrContainer');
+      const btns = document.getElementById('cuentaModalBtns');
+      const btnQR = document.getElementById('btnMostrarQR');
+      const btnImprimir = document.getElementById('btnImprimirCuenta');
+      const btnCerrar = document.getElementById('btnCerrarCuentaModal');
+      // Reset
+      qrDiv.innerHTML = '';
+      qrDiv.style.display = 'none';
+      title.textContent = `Cuenta Mesa ${table.mesa}`;
+      msg.innerHTML = `Elige una opción para entregar la cuenta al cliente:`;
+      overlay.style.display = 'flex';
+      // Mostrar QR
+      btnQR.onclick = function() {
+        qrDiv.innerHTML = '';
+        qrDiv.style.display = 'flex';
+        msg.innerHTML = `<div style='margin-bottom:10px;'>Escanea este código QR para ver la cuenta en tu teléfono:</div><div style='font-size:0.9em;word-break:break-all;'>${urlCuenta}</div>`;
+        new QRCode(qrDiv, {
+          text: urlCuenta,
+          width: 220,
+          height: 220,
+          colorDark: '#222',
+          colorLight: '#fff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      };
+      // Imprimir cuenta (enviar .txt al backend antiguo)
+      btnImprimir.onclick = async function() {
+        btnImprimir.disabled = true;
+        btnImprimir.textContent = 'Enviando...';
+        try {
+          // Puedes parametrizar los datos si lo deseas
+          const resp = await fetch(`${BACKEND_BASE_URL}/emitir-cuenta-txt`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mesa: table.mesa, "id-garzon": table["id-garzon"], personas: table.personas, horaApertura: table.horaApertura })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            msg.innerHTML = 'Cuenta enviada a impresión correctamente.';
+          } else {
+            msg.innerHTML = 'Error al imprimir la cuenta.';
+          }
+        } catch (e) {
+          msg.innerHTML = 'Error al imprimir la cuenta.';
+        }
+        btnImprimir.disabled = false;
+        btnImprimir.textContent = 'Imprimir cuenta';
+      };
+      // Cerrar modal
+      btnCerrar.onclick = function() {
+        overlay.style.display = 'none';
+        qrDiv.innerHTML = '';
+        qrDiv.style.display = 'none';
+      };
+      // Cerrar modal al tocar fuera (WebView compatible)
+      overlay.onclick = function(e) {
+        if (e.target === overlay) {
+          overlay.style.display = 'none';
+          qrDiv.innerHTML = '';
+          qrDiv.style.display = 'none';
+        }
+      };
+      // Prevenir scroll del body
+      document.body.style.overflow = 'hidden';
+      overlay.ontransitionend = function() { document.body.style.overflow = ''; };
+    }
 
     fetchMesasAbiertas();
   </script>
