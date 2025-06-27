@@ -12,6 +12,9 @@ const app = express();
 const PORT = 3000;
 const MESAS_DIR = path.join(__dirname, 'mesas_abiertas');
 
+// Configuración para proxies (necesario para dominios y HTTPS)
+app.set('trust proxy', 1); // Confía en el primer proxy (por ejemplo, NGINX)
+
 // Asegurar que el directorio de mesas existe
 if (!fs.existsSync(MESAS_DIR)) {
   fs.mkdirSync(MESAS_DIR, { recursive: true });
@@ -103,8 +106,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Cambiar a true en producción con HTTPS
+    secure: process.env.NODE_ENV === 'production', // Solo true en producción/HTTPS
     httpOnly: true,
+    sameSite: 'lax', // Permite cookies en subdominios y navegación normal
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
